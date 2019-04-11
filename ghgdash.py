@@ -51,6 +51,7 @@ navbar = dbc.NavbarSimple(
     brand_href="/",
     color="primary",
     dark=True,
+    fluid= True,
 )
 
 left_nav = dbc.Nav(id='left-nav', vertical='md', pills=True)

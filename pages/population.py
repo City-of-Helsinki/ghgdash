@@ -82,31 +82,35 @@ def generate_population_forecast_graph(pop_df):
     return fig
 
 
+  
 population_page_content = dbc.Container([
-    html.H5('Väestöennusteen korjausprosentti'),
-    html.Div([
-        dcc.Slider(
-            id='population-slider',
-            min=-20,
-            max=20,
-            step=5,
-            value=0,
-            marks={x: '%d %%' % x for x in range(-20, 20 + 1, 5)},
+    dbc.Card([
+      dbc.CardHeader(children=[
+          'Väestön määrä vuonna %s: ' % get_variable('target_year'),
+          html.Strong(id='population-count-target-year')]),
+      dbc.CardBody([
+        dcc.Graph(
+            id='population-graph',
+            config={
+                'displayModeBar': False,
+                'showLink': False,
+            }
         ),
-    ], style={'marginBottom': 25}),
-    html.Div([
-        html.P(children=[
-            'Väestön määrä vuonna %s: ' % get_variable('target_year'),
-            html.Strong(id='population-count-target-year')
-        ]),
+      ]),
+      dbc.CardFooter(children=[
+        html.H6('Väestöennusteen korjausprosentti'),
+        html.Div(children=[
+            dcc.Slider(
+                id='population-slider',
+                min=-20,
+                max=20,
+                step=5,
+                value=0,
+                marks={x: '%d %%' % x for x in range(-20, 20 + 1, 5)},
+            ),
+        ],style=dict(padding='0 1em 2em')),
+      ]),
     ]),
-    dcc.Graph(
-        id='population-graph',
-        config={
-            'displayModeBar': False,
-            'showLink': False,
-        }
-    ),
 ])
 
 
