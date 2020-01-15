@@ -125,6 +125,8 @@ def get_sector_by_path(path):
 
     next_metadata = SECTORS
     for sp in path:
+        if not sp:
+            continue
         metadata = next_metadata[sp]
         next_metadata = metadata.get('subsectors', {})
     return metadata
@@ -232,11 +234,11 @@ def predict_emissions(variables, datasets):
 
 
 def calculate_district_heating_reductions(rdf, df):
-    perc = get_contributions_from_multipliers(df, 'NetHeatDemand', 'Emission factor')
+    perc = get_contributions_from_multipliers(df, 'NetHeatDemand', 'Emission factor', ['GeothermalProduction'])
     out = pd.DataFrame(index=rdf.index)
-    hd = out['DistrictHeatDemand'] = rdf * perc.NetHeatDemand
+    out['DistrictHeatDemand'] = rdf * perc.NetHeatDemand
     out['DistrictHeatProduction'] = rdf * perc['Emission factor']
-    out['DistrictHeatToGeothermalProduction'] = (df['GeothermalProduction'] / df['Heat demand']) * hd
+    out['DistrictHeatToGeothermalProduction'] = rdf * perc['GeothermalProduction']
     out['DistrictHeatDemand'] -= out['DistrictHeatToGeothermalProduction']
     return out
 
@@ -250,11 +252,11 @@ def calculate_cars_reductions(rdf, df):
 
 
 def calculate_electricity_consumption_reductions(rdf, df):
-    perc = get_contributions_from_multipliers(df, 'NetConsumption', 'EmissionFactor')
+    perc = get_contributions_from_multipliers(df, 'NetConsumption', 'EmissionFactor', ['SolarProduction'])
     out = pd.DataFrame(index=rdf.index)
     ed = out['ElectricityDemand'] = rdf * perc.NetConsumption
     out['ElectricityProduction'] = rdf * perc.EmissionFactor
-    out['SolarProduction'] = (df['SolarProduction'] / df['ElectricityConsumption']) * ed
+    out['SolarProduction'] = rdf * perc.SolarProduction
     out['ElectricityDemand'] -= out['SolarProduction']
     return out
 
@@ -305,5 +307,5 @@ def predict_emission_reductions():
 if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     df = predict_emission_reductions()
-    print(df.columns)
+    #print(df.columns)
     print(df)

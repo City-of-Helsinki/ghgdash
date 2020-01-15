@@ -64,7 +64,7 @@ VARIABLE_DEFAULTS = {
     },
     'district_heating_target_demand_change': 0,
 
-    'district_heating_existing_building_efficiency_change': -1.0,  # Percent per year
+    'district_heating_existing_building_efficiency_change': -2.0,  # Percent per year
     'district_heating_new_building_efficiency_change': -2.5,  # Percent per year
     'district_heating_heat_pump_cop': 4.0,
 
@@ -75,8 +75,8 @@ VARIABLE_DEFAULTS = {
     'solar_power_new_buildings_percentage': 90,
     'yearly_pv_energy_production_kwh_wp': 0.9,         # kWh/Wp in a year
 
-    'cars_bev_percentage': 30,
-    'cars_mileage_per_resident_adjustment': 0,
+    'cars_bev_percentage': 60,
+    'cars_mileage_per_resident_adjustment': -30,
     'vehicle_fuel_bio_percentage': 30,
 
     'geothermal_heat_pump_cop': 3.2,

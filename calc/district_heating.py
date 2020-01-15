@@ -287,5 +287,4 @@ if __name__ == '__main__':
     #######
     #df = get_contributions_from_multipliers(df1, 'Emission factor', 'Heat demand')
     #print(df)
-    predict_district_heating_emissions()
-
+    print(predict_district_heating_emissions())

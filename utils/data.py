@@ -10,7 +10,7 @@ def find_consecutive_start(values):
     return start_val
 
 
-def get_contributions_from_multipliers(df, a_column, ef_column):
+def get_contributions_from_multipliers(df, a_column, ef_column, a_contributors=[]):
     hdf = df[~df.Forecast]
     fdf = df[df.Forecast]
 
@@ -31,9 +31,14 @@ def get_contributions_from_multipliers(df, a_column, ef_column):
 
     total.name = 'EmissionReductions'
 
-    df = pd.DataFrame(index=total.index)
-    df['EmissionReductions'] = total
-    df[a_column] = a_part
-    df[ef_column] = ef_part
+    out = pd.DataFrame(index=total.index)
+    out['EmissionReductions'] = total
+    out[a_column] = a_part
+    out[ef_column] = ef_part
 
-    return df
+    if a_contributors:
+        a_change = (-(df[a_column] - ref[a_column])).clip(lower=0)
+        for col in a_contributors:
+            out[col] = (df[col] / a_change) * out[a_column]
+
+    return out

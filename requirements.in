@@ -21,3 +21,4 @@ colour
 numba
 python-snappy
 fastparquet
+cython
