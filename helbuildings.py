@@ -721,14 +721,14 @@ def pv_summary_graph_click(
     card = GraphCard(id='simulated-pv-time-series')
     card.set_figure(fig)
 
-    return [
+    return html.Div([
         html.Div([tbl], className='mb-4'),
         html.Div(card.render()),
-    ]
+    ])
 
 
 if __name__ == '__main__':
     # Write the process pid to a file for easier profiling with py-spy
     with open('.helbuildings.pid', 'w') as pid_file:
         pid_file.write(str(os.getpid()))
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8123)
