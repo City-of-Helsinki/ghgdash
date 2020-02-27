@@ -329,21 +329,24 @@ def analyze_building(building, consumption_df, perc_to_test, variables, datasets
 def visualize_building_pv_summary(building, df, variables):
     x = df.SolarPeakPower
 
-    t1 = go.Scatter(
+    t1 = dict(
+        type='scatter',
         x=x,
         y=df.InstallationPrice / variables['investment_years'] / 1000,
         mode='lines',
         name='Investointikustannukset (per vuosi, %d v)' % variables['investment_years'],
         marker=dict(color='red')
     )
-    t2 = go.Scatter(
+    t2 = dict(
+        type='scatter',
         x=x,
         y=(df.EnergyCostSavings + df.EnergySalesIncome) / 1000,
         mode='lines',
         name='Säästö (per vuosi)',
         marker=dict(color='green'),
     )
-    t3 = go.Scatter(
+    t3 = dict(
+        type='scatter',
         x=x,
         y=df.EmissionReductionCost,
         mode='lines',
@@ -372,7 +375,7 @@ def visualize_building_pv_summary(building, df, variables):
             hoverformat='.2r',
         ),
         separators=', ',
-        margin=go.layout.Margin(
+        margin=dict(
             t=30,
             r=60,
             l=60,
@@ -381,7 +384,7 @@ def visualize_building_pv_summary(building, df, variables):
         legend=dict(x=0, y=1),
     )
 
-    fig = go.Figure(data=[t1, t2, t3], layout=layout)
+    fig = dict(data=[t1, t2, t3], layout=layout)
 
     card = GraphCard(id='pv-summary', graph=dict(config=dict(displayModeBar='hover', responsive=False)))
     card.set_figure(fig)
@@ -412,11 +415,12 @@ def building_base_info_callback(selected_building_id):
         el_s = datasets['electricity_supply_emission_factor']
         el_s = el_s.loc[el_s.index >= '2016']
         el_s = el_s.groupby(pd.Grouper(freq='d')).mean()
-        trace = go.Scatter(
+        trace = dict(
+            type='scatter',
             y=el_s, x=el_s.index, mode='lines',
         )
         layout = make_layout(title='Sähkönhankinnan päästökerroin')
-        fig = go.Figure(data=[trace], layout=layout)
+        fig = dict(data=[trace], layout=layout)
 
         card = GraphCard(id='electricity-supply-unit-emissions', graph=dict(config=dict(displayModeBar='hover')))
         card.set_figure(fig)
@@ -445,7 +449,8 @@ def building_base_info_callback(selected_building_id):
     group_freq = 'd'
     el_emissions = el_samples.emissions.groupby(pd.Grouper(freq=group_freq)).sum()
 
-    t1 = go.Scatter(
+    t1 = dict(
+        type='scatter',
         x=el_emissions.index,
         y=el_emissions,
         mode='lines',
@@ -458,7 +463,8 @@ def building_base_info_callback(selected_building_id):
     if not dh_samples.empty:
         dh_emissions = dh_samples.emissions.groupby(pd.Grouper(freq=group_freq)).sum()
 
-        t2 = go.Scatter(
+        t2 = dict(
+            type='scatter',
             x=dh_emissions.index,
             y=dh_emissions,
             mode='lines',
@@ -477,7 +483,7 @@ def building_base_info_callback(selected_building_id):
         xaxis=dict(
             fixedrange=False
         ),
-        margin=go.layout.Margin(
+        margin=dict(
             t=30,
             r=60,
             l=60,
@@ -534,9 +540,9 @@ def building_selector_callback(
 
     if selected_building_id is None:
         perc_sol = datasets['yearly_solar_radiation_ratio']
-        trace = go.Scatter(y=perc_sol, x=perc_sol.index, mode='lines')
+        trace = dict(y=perc_sol, x=perc_sol.index, mode='lines', type='scatter')
         layout = make_layout(title='Aurinkosäteily Kumpulassa')
-        fig = go.Figure(data=[trace], layout=layout)
+        fig = dict(data=[trace], layout=layout)
 
         card = GraphCard(id='solar_radiation', graph=dict(config=dict(displayModeBar='hover')))
         card.set_figure(fig)
@@ -622,7 +628,7 @@ def pv_summary_graph_click(
 ):
     print(click_data)
     if not click_data:
-        return
+        return html.Div()
     perc = click_data['points'][0]['pointNumber']
 
     datasets = dict(
@@ -678,24 +684,26 @@ def pv_summary_graph_click(
 
     df = res['simulated']
 
-    t1 = go.Scatter(
+    t1 = dict(
         x=df.index,
         y=-df.Consumption,
         mode='lines',
         line=dict(width=0),
         stackgroup='one',
         name='Kiinteistön sähkönkulutus',
+        type='scatter',
     )
-    t2 = go.Scatter(
+    t2 = dict(
         x=df.index,
         y=df.PanelProduction,
         mode='lines',
         line=dict(width=0),
         stackgroup='one',
-        name='Aurinkosähköjärjestelmän tuotanto'
+        name='Aurinkosähköjärjestelmän tuotanto',
+        type='scatter',
     )
 
-    fig = go.Figure(data=[t1, t2], layout=make_layout(
+    fig = dict(data=[t1, t2], layout=make_layout(
         title='Simuloitu aurinkosähköjärjestelmä',
         yaxis=dict(
             rangemode='normal',
@@ -704,7 +712,7 @@ def pv_summary_graph_click(
         xaxis=dict(
             fixedrange=False
         ),
-        margin=go.layout.Margin(
+        margin=dict(
             t=30,
             r=60,
             l=60,
@@ -720,9 +728,9 @@ def pv_summary_graph_click(
     card = GraphCard(id='simulated-pv-time-series', graph=dict(config=dict(displayModeBar='hover')))
     card.set_figure(fig)
 
-    return html.Div([
-        html.Div([tbl], className='mb-4'),
-        html.Div(card.render()),
+    return html.Div(children=[
+        html.Div(children=tbl, className='mb-4'),
+        html.Div(children=card.render()),
     ])
 
 
