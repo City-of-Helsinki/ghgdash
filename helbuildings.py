@@ -383,7 +383,7 @@ def visualize_building_pv_summary(building, df, variables):
 
     fig = go.Figure(data=[t1, t2, t3], layout=layout)
 
-    card = GraphCard(id='pv-summary')
+    card = GraphCard(id='pv-summary', graph=dict(config=dict(displayModeBar='hover', responsive=False)))
     card.set_figure(fig)
     return html.Div([
         dbc.Row([
@@ -398,9 +398,8 @@ def visualize_building_pv_summary(building, df, variables):
 
 
 @app.callback(
+    Output('building-info-placeholder', 'children'),
     [
-        Output('building-info-placeholder', 'children'),
-    ], [
         Input('building-selector-dropdown', 'value'),
     ]
 )
@@ -419,7 +418,7 @@ def building_base_info_callback(selected_building_id):
         layout = make_layout(title='Sähkönhankinnan päästökerroin')
         fig = go.Figure(data=[trace], layout=layout)
 
-        card = GraphCard(id='electricity-supply-unit-emissions')
+        card = GraphCard(id='electricity-supply-unit-emissions', graph=dict(config=dict(displayModeBar='hover')))
         card.set_figure(fig)
 
         return html.Div([
@@ -469,7 +468,7 @@ def building_base_info_callback(selected_building_id):
         )
         traces.append(t2)
 
-    fig = go.Figure(data=traces, layout=make_layout(
+    fig = dict(data=traces, layout=make_layout(
         title='Kiinteistön energiankulutuksen päästöt: %s' % ' '.join(building.description.split(' ')[1:]),
         yaxis=dict(
             rangemode='normal',
@@ -491,9 +490,9 @@ def building_base_info_callback(selected_building_id):
         ),
     ))
 
-    card = GraphCard(id='building-all-emissions')
+    card = GraphCard(id='building-all-emissions', graph=dict(config=dict(displayModeBar='hover', responsive=False)))
     card.set_figure(fig)
-    return [card.render()]
+    return card.render()
 
 
 @app.callback(
@@ -539,7 +538,7 @@ def building_selector_callback(
         layout = make_layout(title='Aurinkosäteily Kumpulassa')
         fig = go.Figure(data=[trace], layout=layout)
 
-        card = GraphCard(id='solar_radiation')
+        card = GraphCard(id='solar_radiation', graph=dict(config=dict(displayModeBar='hover')))
         card.set_figure(fig)
 
         return html.Div([
@@ -718,7 +717,7 @@ def pv_summary_graph_click(
         ),
     ))
 
-    card = GraphCard(id='simulated-pv-time-series')
+    card = GraphCard(id='simulated-pv-time-series', graph=dict(config=dict(displayModeBar='hover')))
     card.set_figure(fig)
 
     return html.Div([
