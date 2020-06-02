@@ -53,6 +53,7 @@ def predict_cars_mileage(variables):
 
     df['Mileage'] = df['Highways'] + df['Urban']
     df['PerResident'] = df['UrbanPerResident'] + df['HighwaysPerResident']
+    df.Forecast = df.Forecast.astype(bool)
 
     return df
 

@@ -8,6 +8,7 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
+from flask_babel import Babel, lazy_gettext as _
 
 from calc import calcfunc
 from calc.electricity import calculate_electricity_supply_emission_factor
@@ -20,6 +21,7 @@ app = dash.Dash(__name__, suppress_callback_exceptions=True)
 app.css.config.serve_locally = True
 app.scripts.config.serve_locally = True
 server = app.server
+babel = Babel(server)
 with server.app_context():
     server.config.from_object('common.settings')
 
@@ -456,7 +458,7 @@ def building_base_info_callback(selected_building_id):
         mode='lines',
         line=dict(width=0),
         stackgroup='one',
-        name='Sähkönkulutuksen päästöt',
+        name=_('Electricity consumption emissions'),
     )
     traces = [t1]
 
@@ -470,12 +472,12 @@ def building_base_info_callback(selected_building_id):
             mode='lines',
             line=dict(width=0),
             stackgroup='one',
-            name='Lämmönkulutuksen päästöt'
+            name=_('Heat consumption emissions')
         )
         traces.append(t2)
 
     fig = dict(data=traces, layout=make_layout(
-        title='Kiinteistön energiankulutuksen päästöt: %s' % ' '.join(building.description.split(' ')[1:]),
+        title='Building energy consumption emissions: %s' % ' '.join(building.description.split(' ')[1:]),
         yaxis=dict(
             rangemode='normal',
             title='kg (CO₂e.)'

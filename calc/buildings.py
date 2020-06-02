@@ -101,9 +101,9 @@ def generate_heat_use_per_net_area_forecast_existing_buildings(variables, datase
     heat_use = muni_energy_use.query('Sektori == "Kulutus yhteensä (GWh)"').set_index('Vuosi').value
     heat_use *= 1000000  # convert to kWh
 
-    heat_use_per_net_area = heat_use.div(net_area, axis='index').mul(heating_need_correction_factor, axis='index').dropna()
+    # FIXME: Käytä keskiarvoistettua ominaislämmönkulutusta
+    heat_use_per_net_area = heat_use.div(net_area, axis='index').dropna()
     heat_use_per_net_area.name = 'HeatUsePerNetArea'
-
     df = pd.DataFrame(heat_use_per_net_area)
     df['Forecast'] = False
     df.index = df.index.astype(int)
@@ -141,4 +141,5 @@ def generate_heat_use_per_net_area_forecast_new_buildings(variables):
 
 
 if __name__ == '__main__':
-    print(generate_building_floor_area_forecast())
+    print(generate_building_floor_area_forecast() / 1000000)
+    print(generate_heat_use_per_net_area_forecast_existing_buildings())

@@ -114,12 +114,6 @@ class Page:
             badge_el = dbc.Badge(f'{custom_setting_count} ', className='badge-danger')
 
         els = [
-            # dbc.NavItem(dbc.NavLink("Lämmitys", active=True, href="kaukolammon-kulutus")),
-            # dbc.NavItem(dbc.NavLink("Liikenne", href="empty")),
-            # dbc.NavItem(dbc.NavLink("Sähkö", href="electricity")),
-            # dbc.NavItem(dbc.NavLink("Jätteet", href="empty")),
-            # dbc.NavItem(dbc.NavLink("Teollisuus", href="empty")),
-            # dbc.NavItem(dbc.NavLink("Maatalous", href="empty")),
             dbc.DropdownMenu(
                 [
                     dbc.DropdownMenuItem("Väestö", href='/vaesto'),
@@ -211,11 +205,17 @@ class Page:
             def call_func(*args):
                 ret = func(*args)
                 assert isinstance(ret, list)
-                return ret + [self._make_emission_nav()]
+                if self.emission_sector:
+                    ret += [self._make_emission_nav()]
+                return ret
 
             self.callbacks.append(call_func)
 
-            call_func.outputs = outputs + [Output(self.make_id('left-nav'), 'children')]
+            extra_outputs = []
+            if self.emission_sector:
+                extra_outputs += [Output(self.make_id('left-nav'), 'children')]
+
+            call_func.outputs = outputs + extra_outputs
             call_func.inputs = inputs
             call_func.state = []
 

@@ -76,12 +76,14 @@ page = Page(
 
 
 @page.callback(
+    inputs=[
+        Input('population-slider', 'value')
+    ],
     outputs=[
         Output('population-graph', 'figure'),
         Output('population-description', 'children'),
         Output('population-summary-bar-container', 'children')
     ],
-    inputs=[Input('population-slider', 'value')],
 )
 def population_callback(value):
     set_variable('population_forecast_correction', value)

@@ -1,6 +1,7 @@
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
+from flask_babel import lazy_gettext as _
 
 from variables import set_variable, get_variable
 from components.stickybar import StickyBar
@@ -16,9 +17,9 @@ CARS_GOAL = 119  # kt CO2e
 
 
 ENGINE_TYPES = {
-    'electric': dict(name='Sähkömoottori', color=GHG_MAIN_SECTOR_COLORS['ElectricityConsumption']),
-    'gasoline': dict(name='Bensiinimoottori', color='#ffc61e'),
-    'diesel': dict(name='Dieselmoottori', color='#bd2719'),
+    'electric': dict(name=_('Electric'), color=GHG_MAIN_SECTOR_COLORS['ElectricityConsumption']),
+    'gasoline': dict(name=_('Gasoline'), color='#ffc61e'),
+    'diesel': dict(name=_('Diesel'), color='#bd2719'),
 }
 
 

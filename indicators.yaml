@@ -1,0 +1,59 @@
+indicators:
+  - id: ghg_emissions_scope2
+    name_fi: Kasvihuonekaasupäästöt (scope 2)
+    name_en: Greenhouse gas emissions (scope 2)
+    type: emissions
+
+  - id: ghg_emissions_road_transportation
+    name_fi: Tieliikenteen khk-päästöt
+    name_en: Road transportation emissions
+    output: ghg_emissions_scope2
+    output_effect: +
+    type: emissions
+
+  - id: ghg_emissions_cars
+    name_fi: Henkilöautoilun khk-päästöt
+    name_en: Car emissions
+    output: ghg_emissions_road_transportation
+    output_effect: +
+    type: emissions
+
+  - id: car_emission_factor
+    name_fi: Henkilöautojen päästökerroin
+    name_en: Car emission factor
+    output: ghg_emissions_cars
+    output_effect: +
+    type: emission_factor
+
+  - id: car_bev_share
+    name_fi: Sähköautojen osuus ajokilometreistä
+    name_en: Share of mileage driven with BEVs
+    output: car_emission_factor
+    output_effect: '-'
+
+  - id: car_mileage
+    name_fi: Henkilöautoilla ajetut kilometrit
+    name_en: Car mileage
+    output: ghg_emissions_cars
+    output_effect: +
+    type: activity
+
+  - id: car_modal_share
+    name_fi: Henkilöautojen kulkumuoto-osuus
+    name_en: Modal share of cars
+    output: car_mileage
+    output_effect: +
+
+  - id: number_of_trips
+    name_fi: Matkojen lukumäärä
+    name_en: Number of trips
+    output: car_mileage
+    output_effect: +
+    type: activity
+
+  - id: average_trip_length
+    name_fi: Matkojen keskipituus
+    name_en: Average trip length
+    output: car_mileage
+    output_effect: +
+    type: emission_factor

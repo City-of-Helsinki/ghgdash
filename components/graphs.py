@@ -122,6 +122,7 @@ class PredictionFigure:
     title: str = None
     unit_name: str = None
     y_max: float = None
+    zoomable_x = bool = False
     smoothing: bool = False
     fill: bool = False
     stacked: bool = False
@@ -253,6 +254,15 @@ class PredictionFigure:
             tick_vals.append(year)
             tick_labels.append(str(year))
 
+        xattrs = dict(
+            # type='linear',
+            fixedrange=True,
+            # tickvals=tick_vals,
+            # ticklabels=tick_labels,
+        )
+        if self.zoomable_x:
+            xattrs['fixedrange'] = False
+
         layout_args = {}
         if self.legend:
             layout_args['showlegend'] = True
@@ -265,12 +275,7 @@ class PredictionFigure:
                 title=self.unit_name,
                 **yattrs,
             ),
-            xaxis=dict(
-                # type='linear',
-                fixedrange=True,
-                # tickvals=tick_vals,
-                # ticklabels=tick_labels,
-            ),
+            xaxis=xattrs,
             hovermode='closest',
             height=450,
             transition={'duration': 500},

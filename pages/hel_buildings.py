@@ -9,9 +9,10 @@ from dash.dependencies import Input, Output, State
 
 from calc import calcfunc
 from calc.electricity import calculate_electricity_supply_emission_factor
-from components.graphs import make_layout, make_graph_card
+from components.cards import GraphCard
+from components.graphs import make_layout
 from utils.quilt import load_datasets
-from . import page_callback, Page
+from .base import Page
 
 DEFAULT_PRICE_PER_KWH = 12
 INITIAL_INSTALL_PRICE = 5000
@@ -370,10 +371,12 @@ def visualize_building_pv_summary(building, df, variables):
 
     fig = go.Figure(data=[t1, t2, t3], layout=layout)
 
+    card = GraphCard(id='pv-summary')
+    card.set_figure(fig)
     return html.Div([
         dbc.Row([
             dbc.Col([
-                make_graph_card(dcc.Graph(id='pv-summary-graph', figure=fig, animate=True)),
+                card.render()
             ], md=12),
         ]),
         dcc.Loading(id="loading-2", children=[
@@ -382,9 +385,13 @@ def visualize_building_pv_summary(building, df, variables):
     ])
 
 
-@page_callback(
-    Output('building-info-placeholder', 'children'),
+page = Page('Kaupungin rakennukset ja ilmasto', page_content)
+
+
+@page.callback(
     [
+        Output('building-info-placeholder', 'children'),
+    ], [
         Input('building-selector-dropdown', 'value'),
     ]
 )
@@ -402,11 +409,13 @@ def building_base_info_callback(selected_building_id):
         )
         layout = make_layout(title='Sähkönhankinnan päästökerroin')
         fig = go.Figure(data=[trace], layout=layout)
-        g2 = dcc.Graph(id='electricity-supply-unit-emissions', figure=fig)
+
+        card = GraphCard(id='electricity-supply-unit-emissions')
+        card.set_figure(fig)
 
         return html.Div([
             dbc.Row([
-                dbc.Col([make_graph_card(g2)]),
+                dbc.Col([card.render()]),
             ]),
         ])
 
@@ -470,10 +479,12 @@ def building_base_info_callback(selected_building_id):
         ),
     ))
 
-    return make_graph_card(dcc.Graph(id='building-all-emissions-graph', figure=fig))
+    card = GraphCard(id='building-all-emissions')
+    card.set_figure(fig)
+    return card.render()
 
 
-@page_callback(
+@page.callback(
     Output('building-placeholder', 'children'),
     [
         Input('building-selector-dropdown', 'value'),
@@ -515,11 +526,13 @@ def building_selector_callback(
         trace = go.Scatter(y=perc_sol, x=perc_sol.index, mode='lines')
         layout = make_layout(title='Aurinkosäteily Kumpulassa')
         fig = go.Figure(data=[trace], layout=layout)
-        g1 = dcc.Graph(id='solar-radiation', figure=fig)
+
+        card = GraphCard(id='solar_radiation')
+        card.set_figure(fig)
 
         return html.Div([
             dbc.Row([
-                dbc.Col([make_graph_card(g1)]),
+                dbc.Col([card.render()]),
             ]),
         ])
 
@@ -574,7 +587,7 @@ def translate_sum_col(n, unit=False):
         return UNITS[n]
 
 
-@page_callback(
+@page.callback(
     Output('pv-details-placeholder', 'children'),
     [
         Input('pv-summary-graph', 'clickData'),
@@ -694,6 +707,3 @@ def pv_summary_graph_click(
         html.Div([tbl], className='mb-4'),
         html.Div(make_graph_card(dcc.Graph('simulated-pv-time-series', figure=fig))),
     ]
-
-
-page = Page('Kaupungin rakennukset ja ilmasto', page_content, [building_base_info_callback, building_selector_callback, pv_summary_graph_click])

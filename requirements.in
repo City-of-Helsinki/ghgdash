@@ -22,3 +22,4 @@ numba
 python-snappy
 fastparquet
 cython
+dash-cytoscape

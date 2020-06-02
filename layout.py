@@ -40,6 +40,9 @@ def generate_layout():
 
 
 def display_page(current_path, href):
+    if current_path is None:
+        return [None]
+
     pc = PerfCounter('Page %s' % current_path)
     pc.display('start')
 
