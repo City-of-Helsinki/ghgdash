@@ -17,11 +17,12 @@ cython==0.29.19           # via -r requirements.in
 dash-archer==0.1.0        # via -r requirements.in
 dash-bootstrap-components==0.10.1  # via -r requirements.in
 dash-core-components==1.10.0  # via -r requirements.in, dash
+dash-cytoscape==0.1.1     # via -r requirements.in
 dash-daq==0.5.0           # via -r requirements.in
-dash-html-components==1.0.3  # via -r requirements.in, dash
+dash-html-components==1.0.3  # via -r requirements.in, dash, dash-cytoscape
 dash-table==4.7.0         # via -r requirements.in, dash
-dash==1.12.0              # via -r requirements.in, dash-bootstrap-components, dash-daq
-dash_renderer==1.4.1      # via dash
+dash==1.12.0              # via -r requirements.in, dash-bootstrap-components, dash-cytoscape, dash-daq
+dash_renderer==1.4.1      # via dash, dash-cytoscape
 fastparquet==0.4.0        # via -r requirements.in
 flask-babel==1.0.0        # via -r requirements.in
 flask-caching==1.8.0      # via -r requirements.in
