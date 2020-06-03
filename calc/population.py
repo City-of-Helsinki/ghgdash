@@ -45,6 +45,7 @@ def get_adjusted_population_forecast(variables):
     m_series = pd.Series(multipliers, index=forecast.index)
     df.loc[df.Forecast, 'Population'] *= m_series
     df.Population = df.Population.astype(int)
+    df.Forecast = df.Forecast.astype(bool)
     return df
 
 
