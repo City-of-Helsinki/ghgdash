@@ -269,8 +269,10 @@ class PredictionFigure:
             if self.legend_x:
                 layout_args['legend'] = dict(x=self.legend_x)
 
+        if self.title:
+            layout_args['title'] = self.title
+
         layout = make_layout(
-            title=self.title,
             yaxis=dict(
                 title=self.unit_name,
                 **yattrs,

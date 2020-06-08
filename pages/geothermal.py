@@ -18,6 +18,7 @@ class GeothermalPage(Page):
         max_perc = 40
         self.add_graph_card(
             id='renovated-per-year',
+            title='Olemassaolevan rakennuskannan maalämmöllä lämmitettävä kerrosala',
             slider=dict(
                 min=0,
                 max=max_perc,
@@ -28,6 +29,7 @@ class GeothermalPage(Page):
         )
         self.add_graph_card(
             id='new-building-installation',
+            title='Uuden rakennuskannan maalämmöllä lämmitettävä kerrosala',
             slider=dict(
                 min=0,
                 max=100,
@@ -36,10 +38,24 @@ class GeothermalPage(Page):
                 marks={x: '%d %%' % x for x in range(0, 100 + 1, 10)},
             ),
         )
-        self.add_graph_card(id='geothermal-production', link_to_page=('BuildingHeating', 'GeothermalHeating'))
-        self.add_graph_card(id='emissions')
-        self.add_graph_card(id='electricity-emission-factor')
-        self.add_graph_card(id='district-heat-emission-factor', link_to_page=('BuildingHeating', 'DistrictHeat'))
+        self.add_graph_card(
+            id='geothermal-production',
+            title='Maalämpötuotanto',
+            link_to_page=('BuildingHeating', 'GeothermalHeating'),
+        )
+        self.add_graph_card(
+            id='emissions',
+            title='Maalämmön nettopäästöt',
+        )
+        self.add_graph_card(
+            id='electricity-emission-factor',
+            title='Sähköntuotannon päästökerroin',
+        )
+        self.add_graph_card(
+            id='district-heat-emission-factor',
+            title='Kaukolämmöntuotannon päästökerroin',
+            link_to_page=('BuildingHeating', 'DistrictHeat'),
+        )
 
     def get_content(self):
         grid = ConnectedCardGrid()
@@ -93,7 +109,6 @@ class GeothermalPage(Page):
         fig = PredictionFigure(
             sector_name='BuildingHeating',
             unit_name='milj. k-m²',
-            title='Olemassaolevan rakennuskannan maalämmöllä lämmitettävä kerrosala',
             smoothing=True,
             y_max=25,
         )
@@ -139,7 +154,6 @@ class GeothermalPage(Page):
         fig = PredictionFigure(
             sector_name='BuildingHeating',
             unit_name='milj. k-m²',
-            title='Uuden rakennuskannan maalämmöllä lämmitettävä kerrosala',
             smoothing=True,
             y_max=10,
         )
@@ -152,7 +166,6 @@ class GeothermalPage(Page):
         fig = PredictionFigure(
             sector_name='BuildingHeating',
             unit_name='GWh',
-            title='Maalämpötuotanto',
             smoothing=True,
             fill=True,
             stacked=True,
@@ -178,7 +191,6 @@ class GeothermalPage(Page):
         fig = PredictionFigure(
             sector_name='BuildingHeating',
             unit_name='g/kWh',
-            title='Kaukolämmöntuotannon päästökerroin',
             smoothing=True,
         )
         fig.add_series(
@@ -208,7 +220,6 @@ class GeothermalPage(Page):
         fig = PredictionFigure(
             sector_name='ElectricityConsumption',
             unit_name='g/kWh',
-            title='Sähköntuotannon päästökerroin',
             smoothing=True,
         )
         fig.add_series(
@@ -229,7 +240,6 @@ class GeothermalPage(Page):
         fig = PredictionFigure(
             sector_name='BuildingHeating',
             unit_name='kt',
-            title='Maalämmön nettopäästöt',
             smoothing=True,
             fill=True,
         )

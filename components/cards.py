@@ -53,6 +53,7 @@ class ConnectedCard(ConnectedCardBase):
 @dataclass
 class GraphCard(ConnectedCardBase):
     id: str
+    title: str = None
     graph: dict = None
     slider: dict = None
     extra_content: Component = None
@@ -77,12 +78,19 @@ class GraphCard(ConnectedCardBase):
                 page = self.link_to_page
             graph_el = dcc.Link(children=graph_el, href=page.path)
 
-        card = dbc.Card(
+        if self.title:
+            header_el = dbc.CardHeader(self.title)
+        else:
+            header_el = None
+
+        card = dbc.Card([
+            header_el,
             dbc.CardBody(children=[
                 graph_el,
                 dbc.Row(id=self.id + '-description'),
                 self.extra_content,
-            ]), className=' '.join(classes),
+            ])],
+            className=' '.join(classes),
         )
         return card
 
