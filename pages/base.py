@@ -128,6 +128,17 @@ class Page:
                 "Omat asetukset",
                 badge_el,
             ])),
+            dbc.NavItem(html.Span(html.I(className='language-icon')), className='nav-link pr-0'),
+            dbc.DropdownMenu(
+                [
+                    dbc.DropdownMenuItem("Suomi", href='/fi'),
+                    dbc.DropdownMenuItem("English", href='/en')
+                ],
+                nav=True,
+                in_navbar=True,
+                label="FI",
+                right=True,
+            ),
         ]
         return dbc.NavbarSimple(
             brand="Päästöskenaario %s" % self.get_variable('target_year'),
