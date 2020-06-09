@@ -1,6 +1,10 @@
 $archer-width: 8px;
 $archer-color: #a1a1a1;
 
+$simple-line-font-path     : "https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.4.1/fonts/";
+
+@import "simple-line-icons/scss/simple-line-icons.scss";
+
 body, html {
   background-color: #f2f2f2;
 }
@@ -9,6 +13,11 @@ body, html {
   min-width: 760px;
   margin-top: 4em;
   margin-bottom: 200px;
+}
+
+.language-icon {
+  @extend .icon-globe;
+  margin-left: 1rem;
 }
 
 .summary-card {
