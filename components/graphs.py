@@ -71,12 +71,15 @@ class PredictionFigureSeries:
     forecast_color: str = None
     color_idx: int = None
     color_scale: int = None
+    forecast: pd.Series = None
 
     def __post_init__(self):
-        df = self.df
+        df = self.df = self.df.copy()
+        if self.forecast is None:
+            assert 'Forecast' in df.columns
+            self.forecast = df.pop('Forecast')
+
         col_names = list(df.columns)
-        assert 'Forecast' in df.columns
-        col_names.remove('Forecast')
         if 'Year' in col_names:
             self.df = df = df.set_index('Year')
             col_names.remove('Year')
@@ -158,7 +161,7 @@ class PredictionFigure:
             start_year = find_consecutive_start(df.index)
 
         y_column = series.column_name
-        hist_series = df.loc[~df.Forecast & (df.index >= start_year), y_column].dropna()
+        hist_series = df.loc[~series.forecast & (df.index >= start_year), y_column].dropna()
 
         hovertemplate = '%{x}: %{y}'
         if self.unit_name:
@@ -192,9 +195,9 @@ class PredictionFigure:
 
             traces.append(hist_trace)
             last_hist_year = hist_series.index.max()
-            forecast_series = df.loc[df.Forecast | (df.index == last_hist_year), y_column]
+            forecast_series = df.loc[series.forecast | (df.index == last_hist_year), y_column]
         else:
-            forecast_series = df.loc[df.Forecast, y_column]
+            forecast_series = df.loc[series.forecast, y_column]
 
         forecast_series = forecast_series.dropna()
         if len(forecast_series):
@@ -233,7 +236,7 @@ class PredictionFigure:
         if self.max_year is None or df.index.max() > self.max_year:
             self.max_year = df.index.max()
 
-        fstart = df.loc[~df.Forecast].index.max()
+        fstart = df.loc[~series.forecast].index.max()
         if self.forecast_start_year is None or fstart < self.forecast_start_year:
             self.forecast_start_year = fstart
 

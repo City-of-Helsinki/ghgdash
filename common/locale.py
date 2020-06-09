@@ -1,5 +1,6 @@
 from plotly import utils as plotly_utils
 from flask_babel.speaklater import LazyString
+from flask_babel import lazy_gettext  # noqa
 from flask import request, session
 import flask
 

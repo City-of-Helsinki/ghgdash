@@ -9,8 +9,9 @@ from components.graphs import PredictionFigure
 from components.card_description import CardDescription
 from components.cards import GraphCard, ConnectedCardGrid
 from .base import Page
+from .modal_share import ModalSharePage
 
-from calc.cars import predict_cars_emissions
+from calc.transportation.cars import predict_cars_emissions
 from utils.colors import GHG_MAIN_SECTOR_COLORS
 
 CARS_GOAL = 119  # kt CO2e
@@ -29,7 +30,6 @@ def draw_bev_chart(df):
     graph = PredictionFigure(
         sector_name='Transportation',
         unit_name='%',
-        title='Sähköautojen ajosuoriteosuus',
         legend=True,
         legend_x=0.6,
         y_max=100,
@@ -62,6 +62,8 @@ def generate_page():
     grid = ConnectedCardGrid()
     bev_perc_card = GraphCard(
         id='cars-bev-percentage',
+        title='Sähköautojen ajosuoriteosuus',
+        title_i18n=dict(en='BEV mileage share'),
         slider=dict(
             min=0,
             max=100,
@@ -72,22 +74,24 @@ def generate_page():
     )
     per_resident_card = GraphCard(
         id='cars-mileage-per-resident',
-        slider=dict(
-            min=-60,
-            max=20,
-            step=5,
-            value=get_variable('cars_mileage_per_resident_adjustment'),
-            marks={x: '%d %%' % (x) for x in range(-60, 20 + 1, 10)},
-        ),
+        title='Ajokilometrit asukasta kohti',
+        title_i18n=dict(en='Car mileage per resident'),
+        link_to_page=ModalSharePage,
     )
     mileage_card = GraphCard(
         id='cars-total-mileage',
+        title='%s ajetut henkilöautokilometrit' % get_variable('municipality_locative'),
+        title_i18n=dict(en='%s ajetut henkilöautokilometrit' % get_variable('municipality_name')),
     )
     emission_factor_card = GraphCard(
         id='cars-emission-factor',
+        title='Henkilöautojen päästökerroin',
+        title_i18n=dict(en='Emission factor of cars'),
     )
     emissions_card = GraphCard(
         id='cars-emissions',
+        title='Henkilöautoilun päästöt',
+        title_i18n=dict(en='Emissions from car transport'),
     )
     """
     biofuel_card = GraphCard(
@@ -128,7 +132,6 @@ page = Page(
 
 @page.callback(inputs=[
     Input('cars-bev-percentage-slider', 'value'),
-    Input('cars-mileage-per-resident-slider', 'value'),
 ], outputs=[
     Output('cars-bev-percentage-graph', 'figure'),
     Output('cars-bev-percentage-description', 'children'),
@@ -140,9 +143,8 @@ page = Page(
     Output('cars-emissions-graph', 'figure'),
     Output('cars-sticky-page-summary-container', 'children'),
 ])
-def cars_callback(bev_percentage, mileage_adj):
+def cars_callback(bev_percentage):
     set_variable('cars_bev_percentage', bev_percentage)
-    set_variable('cars_mileage_per_resident_adjustment', mileage_adj)
 
     df = predict_cars_emissions()
     df['Mileage'] /= 1000000
@@ -163,7 +165,6 @@ def cars_callback(bev_percentage, mileage_adj):
     graph = PredictionFigure(
         sector_name='Transportation',
         unit_name='km/as.',
-        title='Ajokilometrit asukasta kohti',
     )
     graph.add_series(
         df=df, column_name='PerResident', trace_name='Suorite/as.',
@@ -174,7 +175,6 @@ def cars_callback(bev_percentage, mileage_adj):
     graph = PredictionFigure(
         sector_name='Transportation',
         unit_name='milj. km',
-        title='%s ajetut henkilöautokilometrit' % get_variable('municipality_locative'),
         fill=True,
     )
     graph.add_series(
@@ -186,7 +186,6 @@ def cars_callback(bev_percentage, mileage_adj):
     graph = PredictionFigure(
         sector_name='Transportation',
         unit_name='g/km',
-        title='Henkilöautojen päästökerroin',
     )
     graph.add_series(
         df=df, column_name='EmissionFactor', trace_name='Päästökerroin',
@@ -197,7 +196,6 @@ def cars_callback(bev_percentage, mileage_adj):
     graph = PredictionFigure(
         sector_name='Transportation',
         unit_name='kt (CO₂e.)',
-        title='Henkilöautoilun päästöt',
         fill=True,
     )
     graph.add_series(
@@ -210,10 +208,11 @@ def cars_callback(bev_percentage, mileage_adj):
     last_forecast = df[df.Forecast].iloc[-1]
     last_history = df[~df.Forecast].iloc[-1]
 
+    mileage_change = (1 - (last_forecast.Mileage / last_history.Mileage)) * 100
     cd.set_values(
         bev_percentage=get_variable('cars_bev_percentage'),
         bev_mileage=last_forecast.Mileage * last_forecast.electric,
-        per_resident_adjustment=get_variable('cars_mileage_per_resident_adjustment'),
+        per_resident_adjustment=mileage_change,
         target_population=last_forecast.Population,
     )
     bev_desc = cd.render("""
@@ -225,7 +224,7 @@ def cars_callback(bev_percentage, mileage_adj):
     pr_desc = cd.render("""
         Vuonna {target_year} {municipality_locative} asuu {target_population} ihmistä.
         Skenaariossa ajokilometrit asukasta kohti muuttuvat vuoteen {target_year} mennessä
-        {per_resident_adjustment:noround} %.
+        {per_resident_adjustment} %.
     """)
 
     sticky = make_bottom_bar(df)

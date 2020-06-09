@@ -7,29 +7,32 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash_core_components as dcc
 
+from common.locale import get_active_locale
 from utils.colors import ARCHER_STROKE
 from .graphs import Graph, PredictionFigure
 
 
 class ConnectedCardBase:
     def __init__(self, id):
-        self.upstream_card = None
-        self.downstream_card = None
+        self.upstream_cards = []
+        self.downstream_cards = []
         self.id = id
 
     def connect_to(self, card: GraphCard):
-        self.downstream_card = card
-        card.upstream_card = self
+        assert card not in self.downstream_cards
+        self.downstream_cards.append(card)
+        assert self not in card.upstream_cards
+        card.upstream_cards.append(self)
 
     def render(self, is_top_row: bool = True) -> dbc.Card:
         raise NotImplementedError()
 
     def get_classes(self, is_top_row: bool):
         classes = ['mb-4']
-        if self.downstream_card:
+        if self.downstream_cards:
             classes.append('card-border-bottom')
 
-        if self.upstream_card:
+        if self.upstream_cards:
             classes.append('card-border-top')
             classes.append('grid-downstream-card')
         elif not is_top_row:
@@ -54,6 +57,7 @@ class ConnectedCard(ConnectedCardBase):
 class GraphCard(ConnectedCardBase):
     id: str
     title: str = None
+    title_i18n: dict = None
     graph: dict = None
     slider: dict = None
     extra_content: Component = None
@@ -64,6 +68,8 @@ class GraphCard(ConnectedCardBase):
         if self.graph is None:
             self.graph = {}
         self.description = None
+        if self.title_i18n is None:
+            self.title_i18n = {}
 
     def render(self, is_top_row: bool = True) -> dbc.Card:
         graph = Graph(self.id, self.graph, self.slider)
@@ -71,8 +77,10 @@ class GraphCard(ConnectedCardBase):
 
         graph_el = html.Div(graph.render(), className="slider-card__content")
 
-        if self.title:
-            header_content = dbc.CardHeader(html.H4(self.title))
+        language = get_active_locale()
+        title = self.title_i18n.get(language, self.title)
+        if title:
+            header_content = dbc.CardHeader(html.H4(title))
         else:
             header_content = None
 
@@ -150,7 +158,7 @@ class ConnectedCardGrid:
         # First check if this is an archered grid
         for row in self.rows:
             for card in row.cards:
-                if card.downstream_card or card.upstream_card:
+                if card.downstream_cards or card.upstream_cards:
                     grid_has_archer = True
                     break
             if grid_has_archer:
@@ -163,11 +171,11 @@ class ConnectedCardGrid:
             for card in row.cards:
                 is_top_row = row_idx == 0
                 card_el = card.render(is_top_row)
-                if card.downstream_card or card.upstream_card:
+                if card.downstream_cards or card.upstream_cards:
                     relations = []
-                    if card.downstream_card:
+                    for ds in card.downstream_cards:
                         relations.append(dict(
-                            targetId='%s-elem' % card.downstream_card.id,
+                            targetId='%s-elem' % ds.id,
                             targetAnchor='top',
                             sourceAnchor='bottom'
                         ))

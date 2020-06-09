@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 
 from pages.routing import get_page_for_emission_sector
 from calc.emissions import predict_emissions, SECTORS
+from common.locale import get_active_locale, lazy_gettext as _
 
 from variables import get_variable
 
@@ -65,8 +66,11 @@ def make_emission_nav(current_page):
                 active = False
 
             page = get_page_for_emission_sector(*subsector_path)
+            name = metadata.get('name_%s' % get_active_locale())
+            if name is None:
+                name = metadata['name']
             item = _make_nav_item(
-                metadata['name'], emissions, level, page, active=active
+                name, emissions, level, page, active=active
             )
             items.append(item)
 
@@ -76,10 +80,10 @@ def make_emission_nav(current_page):
 
     render_sector(ts, tuple(), 0)
 
-    items.append(_make_nav_item('Yhteensä', sector_emissions.sum(), 0, None, bold=True))
+    items.append(_make_nav_item(_('Total'), sector_emissions.sum(), 0, None, bold=True))
 
     return html.Div([
-        html.H6('Päästöt vuonna %s' % target_year),
+        html.H6(_('Emissions in year %(year)d', year=target_year)),
         dbc.ListGroup(children=items)
     ])
 

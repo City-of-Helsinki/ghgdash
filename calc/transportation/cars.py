@@ -1,37 +1,23 @@
 import pandas as pd
-from . import calcfunc
-from .bass import generate_bass_diffusion
-from .population import get_adjusted_population_forecast
-from .electricity import predict_electricity_emission_factor
-
-
-@calcfunc(
-    datasets=dict(
-        emissions='jyrjola/lipasto/emissions_by_municipality',
-    ),
-    variables=[
-        'municipality_name'
-    ]
-)
-def prepare_car_emissions_dataset(datasets, variables):
-    df = datasets['emissions']
-    df = df[df.Municipality == 'Helsinki'].copy()
-    df.Vehicle = df.Vehicle.astype('category')
-    df.Road = df.Road.astype('category')
-    return df
+from calc import calcfunc
+from calc.bass import generate_bass_diffusion
+from calc.population import get_adjusted_population_forecast
+from calc.electricity import predict_electricity_emission_factor
+from calc.transportation.datasets import prepare_transportation_emissions_dataset
+from calc.transportation.modal_share import predict_road_mileage
 
 
 @calcfunc(
     variables=[
         'target_year', 'municipality_name', 'cars_mileage_per_resident_adjustment'
     ],
-    funcs=[get_adjusted_population_forecast, prepare_car_emissions_dataset],
+    funcs=[get_adjusted_population_forecast, prepare_transportation_emissions_dataset],
 )
-def predict_cars_mileage(variables):
+def predict_cars_mileage_old(variables):
     target_year = variables['target_year']
     mileage_adj = variables['cars_mileage_per_resident_adjustment']
 
-    df = prepare_car_emissions_dataset()
+    df = prepare_transportation_emissions_dataset()
     df = df.loc[df.Vehicle == 'Cars', ['Year', 'Road', 'Mileage', 'CO2e']].set_index('Year')
     df = df.pivot(columns='Road', values='Mileage')
     df.columns = df.columns.astype(str)
@@ -54,6 +40,27 @@ def predict_cars_mileage(variables):
     df['Mileage'] = df['Highways'] + df['Urban']
     df['PerResident'] = df['UrbanPerResident'] + df['HighwaysPerResident']
     df.Forecast = df.Forecast.astype(bool)
+
+    return df
+
+
+@calcfunc(
+    funcs=[predict_road_mileage, get_adjusted_population_forecast],
+)
+def predict_cars_mileage():
+    mdf = predict_road_mileage()
+    df = pd.DataFrame(mdf.pop('Forecast'))
+    for vehicle, road in list(mdf.columns):
+        if vehicle == 'Cars':
+            df[road] = mdf[(vehicle, road)]
+
+    pop_df = get_adjusted_population_forecast()
+
+    df['Population'] = pop_df['Population']
+    df['UrbanPerResident'] = df['Urban'] / df['Population']
+    df['HighwaysPerResident'] = df['Highways'] / df['Population']
+    df['Mileage'] = df['Highways'] + df['Urban']
+    df['PerResident'] = df['UrbanPerResident'] + df['HighwaysPerResident']
 
     return df
 
@@ -172,7 +179,7 @@ def calculate_co2e_per_engine_type(mileage, ratios, unit_emissions):
     funcs=[
         predict_electricity_emission_factor,
         predict_cars_mileage,
-        prepare_car_emissions_dataset
+        prepare_transportation_emissions_dataset
     ]
 )
 def predict_cars_emissions(datasets, variables):
@@ -182,7 +189,7 @@ def predict_cars_emissions(datasets, variables):
     mileage_per_engine_type = datasets['mileage_per_engine_type']
     mileage_share_per_engine_type = mileage_per_engine_type.set_index(['Vehicle', 'Engine']).drop(columns='Sum')
 
-    df = prepare_car_emissions_dataset()
+    df = prepare_transportation_emissions_dataset()
     df = df.loc[df.Vehicle == 'Cars', ['Year', 'CO2e', 'Road']].set_index('Year')
     emissions_df = df.pivot(values='CO2e', columns='Road')
 
@@ -219,4 +226,5 @@ def predict_cars_emissions(datasets, variables):
 
 
 if __name__ == '__main__':
-    predict_cars_emissions()
+    df = predict_cars_emissions(skip_cache=True)
+    print(df)

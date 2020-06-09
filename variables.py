@@ -1,5 +1,8 @@
+import json
 import flask
+import hashlib
 from flask import session
+from contextlib import contextmanager
 
 
 SCHEMA = {
@@ -47,6 +50,28 @@ VARIABLE_DEFAULTS = {
         }
     ],
 
+    'road_transportation_mileage_forecast': [
+        ('Cars', 'Highways', 833.66),
+        ('Cars', 'Urban', 1040.0),
+        ('Trucks', 'Highways', 35.92 + 31.89),  # trailer + no-trailer
+        ('Trucks', 'Urban', 29.42 + 28.44),
+        ('Vans', 'Highways', 3.17),
+        ('Vans', 'Urban', 2.97),
+        ('Buses', 'Urban', 42.81),
+        ('Buses', 'Highways', 6.31),
+        # ('jkl', 'ratikka', 12.21),
+        # ('jkl', 'juna', 4.97),
+        # ('jkl', 'metro', 5.41)
+    ],
+    'road_transportation_emission_factor_forecast': [
+        ('Cars', 104.29),
+        ('Vans', 136.58),
+        ('Trucks', 393.68),
+        ('Buses:Local', 55.8),
+        ('Buses:Other', 557.97)
+    ],
+
+
     'bio_emission_factor': 0,  # In percents
 
     'municipality_name': 'Helsinki',
@@ -78,6 +103,7 @@ VARIABLE_DEFAULTS = {
     'cars_bev_percentage': 60,
     'cars_mileage_per_resident_adjustment': -30,
     'vehicle_fuel_bio_percentage': 30,
+    'parking_fee_increase': 50,
 
     'geothermal_heat_pump_cop': 3.2,
     'geothermal_existing_building_renovation': 1.0,  # percent per year
@@ -86,12 +112,24 @@ VARIABLE_DEFAULTS = {
 }
 
 
+_variable_overrides = {}
+
+# Make a hash of the default variables so that when they change,
+# we will reset everybody's custom session variables.
+DEFAULT_VARIABLE_HASH = hashlib.md5(json.dumps(VARIABLE_DEFAULTS).encode('utf8')).hexdigest()
+
+_allow_variable_set = False
+
+
 def set_variable(var_name, value):
     assert var_name in VARIABLE_DEFAULTS
     assert isinstance(value, type(VARIABLE_DEFAULTS[var_name]))
 
-    if value != VARIABLE_DEFAULTS[var_name]:
-        assert flask.has_request_context()
+    if not flask.has_request_context():
+        if not _allow_variable_set:
+            raise Exception('Should not set variable outside of request context')
+        _variable_overrides[var_name] = value
+        return
 
     if value == VARIABLE_DEFAULTS[var_name]:
         if var_name in session:
@@ -101,8 +139,63 @@ def set_variable(var_name, value):
     session[var_name] = value
 
 
-def get_variable(var_name):
+def get_variable(var_name, var_store=None):
+    out = None
+
+    if var_store is not None:
+        out = var_store.get(var_name)
+    elif flask.has_request_context():
+        if session.get('default_variable_hash', '') != DEFAULT_VARIABLE_HASH:
+            reset_variables()
+        if var_name in session:
+            out = session[var_name]
+    elif var_name in _variable_overrides:
+        out = _variable_overrides[var_name]
+
+    if out is None:
+        out = VARIABLE_DEFAULTS[var_name]
+
+    if isinstance(out, list):
+        # Make a copy
+        return list(out)
+
+    return out
+
+
+def reset_variable(var_name):
     if flask.has_request_context():
         if var_name in session:
-            return session[var_name]
-    return VARIABLE_DEFAULTS[var_name]
+            del session[var_name]
+    else:
+        if var_name in _variable_overrides:
+            del _variable_overrides[var_name]
+
+
+def reset_variables():
+    if flask.has_request_context():
+        session['default_variable_hash'] = DEFAULT_VARIABLE_HASH
+        for var_name in VARIABLE_DEFAULTS.keys():
+            if var_name not in session:
+                continue
+            del session[var_name]
+    else:
+        _variable_overrides.clear()
+
+
+def copy_variables():
+    out = {}
+    for var_name in VARIABLE_DEFAULTS.keys():
+        out[var_name] = get_variable(var_name)
+    return out
+
+
+@contextmanager
+def allow_set_variable():
+    global _allow_variable_set
+
+    old = _allow_variable_set
+    _allow_variable_set = True
+    try:
+        yield None
+    finally:
+        _allow_variable_set = old

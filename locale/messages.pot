@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-06-02 18:10+0300\n"
+"POT-Creation-Date: 2020-06-08 11:52+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,6 +23,15 @@ msgstr ""
 
 #: helbuildings.py:475
 msgid "Heat consumption emissions"
+msgstr ""
+
+#: components/emission_nav.py:83
+msgid "Total"
+msgstr ""
+
+#: components/emission_nav.py:86
+#, python-format
+msgid "Emissions in year %(year)d"
 msgstr ""
 
 #: pages/cars.py:20
