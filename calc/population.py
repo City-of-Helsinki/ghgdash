@@ -9,21 +9,22 @@ from . import calcfunc
     )
 )
 def get_population_forecast(variables, datasets):
-    FORECAST_MADE_YEAR = 2018
+    FORECAST_MADE_YEAR = 2019
 
     df = datasets['pop_forecast']
     df = df.loc[df.Alue == variables['municipality_name']]
-    df = df.loc[df.Laadintavuosi == 'Laadittu %s' % FORECAST_MADE_YEAR]
-    df = df.loc[df.Vaihtoehto == 'Perusvaihtoehto']
     df = df.loc[df.Sukupuoli == 'Molemmat sukupuolet']
+    df = df.loc[df.Ikä == 'Väestö yhteensä']
+    df = df.loc[df.Laadintavuosi.isin(['Laadittu %s' % FORECAST_MADE_YEAR, 'Toteutunut'])]
+    df = df.loc[df.Vaihtoehto.isin(['Perusvaihtoehto', 'Toteutunut'])]
     df = df.copy()
 
     df.Vuosi = df.Vuosi.astype(int)
     df.value = df.value.astype(int)
     df.loc[df.Vuosi <= FORECAST_MADE_YEAR, 'Forecast'] = False
     df.loc[df.Vuosi > FORECAST_MADE_YEAR, 'Forecast'] = True
-    df = df.set_index('Vuosi')
-    df = df.loc[df.Ikä == 'Väestö yhteensä'][['value', 'Forecast']].copy()
+    df = df.drop_duplicates('Vuosi').set_index('Vuosi')
+    df = df[['value', 'Forecast']].copy()
     df.rename(columns=dict(value='Population'), inplace=True)
     return df
 
@@ -50,4 +51,4 @@ def get_adjusted_population_forecast(variables):
 
 
 if __name__ == '__main__':
-    print(get_adjusted_population_forecast())
+    print(get_adjusted_population_forecast(skip_cache=True))
