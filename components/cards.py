@@ -70,18 +70,22 @@ class GraphCard(ConnectedCardBase):
         classes = self.get_classes(is_top_row)
 
         graph_el = html.Div(graph.render(), className="slider-card__content")
-        if self.link_to_page:
+
+        if self.title:
+            header_content = dbc.CardHeader(html.H4(self.title))
+        else:
+            header_content = None
+
+        if self.link_to_page: 
             if isinstance(self.link_to_page, tuple):
                 from pages.routing import get_page_for_emission_sector
                 page = get_page_for_emission_sector(*self.link_to_page)
             else:
                 page = self.link_to_page
-            graph_el = dcc.Link(children=graph_el, href=page.path)
-
-        if self.title:
-            header_el = dbc.CardHeader(self.title)
+            link_el = dcc.Link(html.H5('[+]'), href=page.path, className="card-header__link")
+            header_el = html.Div([link_el, header_content])
         else:
-            header_el = None
+            header_el = header_content
 
         card = dbc.Card([
             header_el,
