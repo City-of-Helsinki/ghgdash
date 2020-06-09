@@ -52,20 +52,27 @@ def _hash_funcs(funcs):
     m = hashlib.md5()
     for f in funcs:
         m.update(f.__code__.co_code)
+        if f.filedeps:
+            for fn in f.filedeps:
+                update_time = os.path.getmtime(fn)
+                m.update(bytes(str(update_time), encoding='ascii'))
     return m.hexdigest()
 
 
-def _calculate_cache_key(func, hash_data):
+def generate_cache_key(func, var_store=None):
+    hash_data = _get_func_hash_data(func, None)
+
     funcs = hash_data['funcs']
     variables = hash_data['variables']
-    var_data = json.dumps({x: get_variable(x) for x in variables}, sort_keys=True)
+    var_data = json.dumps({x: get_variable(x, var_store=var_store) for x in variables}, sort_keys=True)
 
     func_hash = _hash_funcs(funcs)
     func_name = '.'.join((func.__module__, func.__name__))
+
     return '%s:%s:%s' % (func_name, hashlib.md5(var_data.encode()).hexdigest(), func_hash)
 
 
-def calcfunc(variables=None, datasets=None, funcs=None):
+def calcfunc(variables=None, datasets=None, funcs=None, filedeps=None):
     if datasets is not None:
         assert isinstance(datasets, (list, tuple, dict))
         if not isinstance(datasets, dict):
@@ -85,26 +92,37 @@ def calcfunc(variables=None, datasets=None, funcs=None):
         for func in funcs:
             assert callable(func) or isinstance(func, str)
 
+    if filedeps is not None:
+        assert isinstance(filedeps, (list, tuple))
+        for filedep in filedeps:
+            assert isinstance(filedep, str)
+            assert os.path.getmtime(filedep)
+
     def wrapper_factory(func):
         func.variables = variables
         func.datasets = datasets
         func.calcfuncs = funcs
+        func.filedeps = filedeps
 
         @wraps(func)
         def wrap_calc_func(*args, **kwargs):
             should_profile = os.environ.get('PROFILE_CALC', '').lower() in ('1', 'true', 'yes')
 
+            only_if_in_cache = kwargs.pop('only_if_in_cache', False)
+            skip_cache = kwargs.pop('skip_cache', False)
+            var_store = kwargs.pop('variable_store', None)
+
             if should_profile:
                 pc = PerfCounter('%s.%s' % (func.__module__, func.__name__))
                 pc.display('enter')
 
-            hash_data = _get_func_hash_data(func, None)
-            cache_key = _calculate_cache_key(func, hash_data)
+            cache_key = generate_cache_key(func, var_store=var_store)
 
             assert 'variables' not in kwargs
             assert 'datasets' not in kwargs
 
-            if not args and not kwargs:
+            unknown_kwargs = set(kwargs.keys()) - set(['step_callback'])
+            if not args and not unknown_kwargs and not skip_cache:
                 should_cache_func = True
             else:
                 should_cache_func = False
@@ -113,11 +131,15 @@ def calcfunc(variables=None, datasets=None, funcs=None):
                 ret = cache.get(cache_key)
                 if ret is not None:  # calcfuncs must not return None
                     if should_profile:
-                        pc.display('cache hit')
+                        pc.display('cache hit (%s)' % cache_key)
                     return ret
+                if only_if_in_cache:
+                    if should_profile:
+                        pc.display('cache miss so leaving as requested (%s)' % cache_key)
+                    return None
 
             if variables is not None:
-                kwargs['variables'] = {x: get_variable(y) for x, y in variables.items()}
+                kwargs['variables'] = {x: get_variable(y, var_store=var_store) for x, y in variables.items()}
 
             if datasets is not None:
                 datasets_to_load = set(list(datasets.values())) - set(_dataset_cache.keys())
@@ -138,6 +160,7 @@ def calcfunc(variables=None, datasets=None, funcs=None):
                 kwargs['datasets'] = {ds_name: _dataset_cache[ds_url] for ds_name, ds_url in datasets.items()}
 
             ret = func(*args, **kwargs)
+
             if should_profile:
                 pc.display('func ret')
             if should_cache_func:
