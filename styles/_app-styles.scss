@@ -102,3 +102,35 @@ body, html {
 .grid-unconnected-downstream-card { margin-top:   125px + $archer-width; }
 
 .plot .scatter .lines { stroke-linecap: round; }
+
+.card-header {
+  background-color: #fff;
+  padding-bottom: 0;
+
+  h4 {
+    margin-bottom: 0;
+  }
+}
+
+a.card-header__link {
+  display: block;
+  background-color: $archer-color;
+  color: #fff;
+  text-align: center;
+  padding: $archer-width;
+
+  &:hover {
+    background-color: darken($archer-color, 10%);
+    text-decoration: none;
+    letter-spacing: 4px;
+  }
+
+  h5 {
+    margin: 0;
+    color: #fff;
+  }
+}
+
+.card-border-top .card-header__link {
+  padding-top: 0;
+}
