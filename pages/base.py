@@ -2,6 +2,7 @@ import flask
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
+from common.locale import get_active_locale
 from components.cards import GraphCard
 from components.stickybar import StickyBar
 
@@ -131,12 +132,12 @@ class Page:
             dbc.NavItem(html.Span(html.I(className='language-icon')), className='nav-link pr-0'),
             dbc.DropdownMenu(
                 [
-                    dbc.DropdownMenuItem("Suomi", href='/fi'),
-                    dbc.DropdownMenuItem("English", href='/en')
+                    dbc.DropdownMenuItem("Suomi", href='/language/fi', external_link=True),
+                    dbc.DropdownMenuItem("English", href='/language/en', external_link=True)
                 ],
                 nav=True,
                 in_navbar=True,
-                label="FI",
+                label=get_active_locale().upper(),
                 right=True,
             ),
         ]

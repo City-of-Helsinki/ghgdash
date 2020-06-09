@@ -51,14 +51,14 @@ VARIABLE_DEFAULTS = {
     ],
 
     'road_transportation_mileage_forecast': [
-        ('Cars', 'Highways', 833.66),
-        ('Cars', 'Urban', 1040.0),
-        ('Trucks', 'Highways', 35.92 + 31.89),  # trailer + no-trailer
-        ('Trucks', 'Urban', 29.42 + 28.44),
-        ('Vans', 'Highways', 3.17),
-        ('Vans', 'Urban', 2.97),
-        ('Buses', 'Urban', 42.81),
-        ('Buses', 'Highways', 6.31),
+        ['Cars', 'Highways', 833.66],
+        ['Cars', 'Urban', 1040.0],
+        ['Trucks', 'Highways', 35.92 + 31.89],  # trailer + no-trailer
+        ['Trucks', 'Urban', 29.42 + 28.44],
+        ['Vans', 'Highways', 3.17],
+        ['Vans', 'Urban', 2.97],
+        ['Buses', 'Urban', 42.81],
+        ['Buses', 'Highways', 6.31],
         # ('jkl', 'ratikka', 12.21),
         # ('jkl', 'juna', 4.97),
         # ('jkl', 'metro', 5.41)
@@ -145,7 +145,7 @@ def get_variable(var_name, var_store=None):
     if var_store is not None:
         out = var_store.get(var_name)
     elif flask.has_request_context():
-        if session.get('default_variable_hash', '') != DEFAULT_VARIABLE_HASH:
+        if session.get('_default_variable_hash', '') != DEFAULT_VARIABLE_HASH:
             reset_variables()
         if var_name in session:
             out = session[var_name]
@@ -173,7 +173,7 @@ def reset_variable(var_name):
 
 def reset_variables():
     if flask.has_request_context():
-        session['default_variable_hash'] = DEFAULT_VARIABLE_HASH
+        session['_default_variable_hash'] = DEFAULT_VARIABLE_HASH
         for var_name in VARIABLE_DEFAULTS.keys():
             if var_name not in session:
                 continue

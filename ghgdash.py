@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import dash
 import os
+import flask
 import dash_cytoscape as cyto
 
 from flask_session import Session
-from flask_babel import Babel
 
 from layout import initialize_app
 from common import cache
@@ -14,11 +14,8 @@ from common.locale import init_locale
 os.environ['DASH_PRUNE_ERRORS'] = 'False'
 os.environ['DASH_SILENCE_ROUTES_LOGGING'] = 'False'
 
-app = dash.Dash(__name__, suppress_callback_exceptions=True)
-app.css.config.serve_locally = True
-app.scripts.config.serve_locally = True
+server = flask.Flask(__name__)
 
-server = app.server
 with server.app_context():
     server.config.from_object('common.settings')
     server.config['BABEL_TRANSLATION_DIRECTORIES'] = 'locale'
@@ -28,9 +25,12 @@ with server.app_context():
     sess = Session()
     sess.init_app(server)
 
-    babel = Babel(default_locale='fi')
-    babel.init_app(server)
-    init_locale(babel)
+    init_locale(server)
+
+
+app = dash.Dash(__name__, server=server, suppress_callback_exceptions=True)
+app.css.config.serve_locally = True
+app.scripts.config.serve_locally = True
 
 
 cyto.load_extra_layouts()

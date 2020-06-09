@@ -51,7 +51,7 @@ def display_page(current_path, href):
 
     page_or_class = all_pages.get(current_path)
     if not page_or_class:
-        return html.H2('Sivua ei löydy')
+        return [html.H2('Sivua ei löydy')]
 
     if isinstance(page_or_class, Page):
         page = page_or_class
