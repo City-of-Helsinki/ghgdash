@@ -6,7 +6,6 @@ __pycache__/
 /.sass-cache/
 /assets/
 /flask-session/
-/flask_session/
 
 # Environment
 .DS_Store
