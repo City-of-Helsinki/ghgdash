@@ -89,13 +89,10 @@ def prepare_daily_trips_dataset(datasets):
     variables=['target_year'],
 )
 def predict_passenger_kms(variables):
-    # df = prepare_daily_trips_dataset()
-
     nr_years = len(list(MODAL_PASSENGER_KMS.values())[0])
     df = pd.DataFrame(MODAL_PASSENGER_KMS, index=range(DATA_START_YEAR, DATA_START_YEAR + nr_years))
     df['Bus'] += df.pop('Bus (Rapid)') + df.pop('Bus (IC)')
 
-    first_hist_year = df.index.min()
     pop = predict_population()
     df['Population'] = pop['Population']
     hist_pop = df.pop('Population')
@@ -109,7 +106,7 @@ def predict_passenger_kms(variables):
     last_hist_year = mdf.index.max()
     shares = mdf.loc[last_hist_year].to_dict()  # from last historical year
 
-    pdf = predict_parking_fee_impact(skip_cache=True)
+    pdf = predict_parking_fee_impact()
 
     TO_MODES = ['Cycling', 'Metro', 'Train', 'Tram']
 
@@ -136,6 +133,7 @@ def predict_passenger_kms(variables):
     mdf = mdf.mul(total, axis=0).astype(int)
     mdf['KmsPerResident'] = total / pop
     mdf['Forecast'] = fc
+
     return mdf
 
 

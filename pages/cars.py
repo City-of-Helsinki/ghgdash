@@ -31,7 +31,7 @@ def draw_bev_chart(df):
         sector_name='Transportation',
         unit_name='%',
         legend=True,
-        legend_x=0.6,
+        legend_x=0.8,
         y_max=100,
     )
 

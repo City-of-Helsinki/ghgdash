@@ -1,6 +1,7 @@
 import json
 import flask
 import hashlib
+import threading
 from flask import session
 from contextlib import contextmanager
 
@@ -105,7 +106,7 @@ VARIABLE_DEFAULTS = {
     'vehicle_fuel_bio_percentage': 30,
 
     'parking_fee_increase': 50,
-    'parking_fee_share_of_cars_impacted': 30,
+    'parking_fee_share_of_cars_impacted': 25,
     'parking_utilization_reduction_per_parking_price_increase': 0.088,  # %/%
 
     'geothermal_heat_pump_cop': 3.2,
@@ -115,7 +116,7 @@ VARIABLE_DEFAULTS = {
 }
 
 
-_variable_overrides = {}
+_variable_overrides = threading.local()
 
 # Make a hash of the default variables so that when they change,
 # we will reset everybody's custom session variables.
@@ -135,7 +136,7 @@ def set_variable(var_name, value):
     if not flask.has_request_context():
         if not _allow_variable_set:
             raise Exception('Should not set variable outside of request context')
-        _variable_overrides[var_name] = value
+        setattr(_variable_overrides, var_name, value)
         return
 
     if value == VARIABLE_DEFAULTS[var_name]:
@@ -151,8 +152,8 @@ def get_variable(var_name, var_store=None):
 
     if var_store is not None:
         out = var_store.get(var_name)
-    elif var_name in _variable_overrides:
-        out = _variable_overrides[var_name]
+    elif hasattr(_variable_overrides, var_name):
+        out = getattr(_variable_overrides, var_name)
     elif flask.has_request_context():
         if session.get('_default_variable_hash', '') != DEFAULT_VARIABLE_HASH:
             reset_variables()
@@ -174,8 +175,8 @@ def reset_variable(var_name):
         if var_name in session:
             del session[var_name]
     else:
-        if var_name in _variable_overrides:
-            del _variable_overrides[var_name]
+        if hasattr(_variable_overrides, var_name):
+            delattr(_variable_overrides, var_name)
 
 
 def reset_variables():
@@ -186,7 +187,7 @@ def reset_variables():
                 continue
             del session[var_name]
     else:
-        _variable_overrides.clear()
+        raise Exception("Can't do this without request context")
 
 
 def copy_variables():
@@ -216,13 +217,13 @@ class Undefined:
 def override_variable(var_name, val):
     _validate_variable_value(var_name, val)
 
-    old_val = _variable_overrides.get(var_name, Undefined)
+    old_val = getattr(_variable_overrides, var_name, Undefined)
 
-    _variable_overrides[var_name] = val
+    setattr(_variable_overrides, var_name, val)
     try:
         yield None
     finally:
         if old_val == Undefined:
-            del _variable_overrides[var_name]
+            delattr(_variable_overrides, var_name)
         else:
-            _variable_overrides[var_name] = old_val
+            setattr(_variable_overrides, var_name, old_val)

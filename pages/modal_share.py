@@ -4,7 +4,7 @@ from common.locale import lazy_gettext as _
 from components.cards import ConnectedCardGrid
 from components.graphs import PredictionFigure
 from components.card_description import CardDescription
-from variables import get_variable, set_variable, override_variable
+from variables import get_variable, override_variable
 from calc.transportation.modal_share import predict_passenger_kms, predict_road_mileage
 from calc.transportation.parking import predict_parking_fee_impact
 from calc.transportation.cars import predict_cars_emissions
@@ -56,13 +56,13 @@ class ModalSharePage(Page):
 
         self.add_graph_card(
             id='modal-shares-rest',
-            title='Muiden kulkumuoto-osuudet matkustajakilometreistä',
+            title='Muiden kulkumuotojen osuudet matkustajakilometreistä',
             title_i18n=dict(en='Shares of passenger mileage for other modes'),
         )
 
         self.add_graph_card(
             id='number-of-passenger-kms',
-            title='Matkustajakilometrien määrä asukasta kohti päivässä',
+            title='Matkustajakilometrien määrä asukasta kohti',
             title_i18n=dict(en='Number of passenger kms per resident per year'),
         )
 
@@ -141,6 +141,7 @@ class ModalSharePage(Page):
         icard = self.get_card('cars-affected-by-parking-fee')
         self.set_variable('parking_fee_share_of_cars_impacted', icard.get_slider_value())
 
+        cd = CardDescription()
         df = predict_parking_fee_impact()
 
         last_hist_year = df[~df.Forecast].index.max()
@@ -153,12 +154,13 @@ class ModalSharePage(Page):
         )
         fig.add_series(df=df, column_name='Fees', trace_name='Pysäköinnin hinta')
         pcard.set_figure(fig)
-        pcard.set_description("""
+
+        pcard.set_description(cd.render("""
         Oletuksena on Wienin tutkimus maksullisen pysäköinnin vaikutuksesta, jonka mukaan pysäköintimaksun
         kaksinkertaistaminen vähentää pysäköintiä ja siten autoliikennettä siihen kohdistuvilla alueilla
-        noin 8%. Helsingissä lyhytaikainen pysäköinti on vähentynyt vuoden 2017 pysäköintimaksujen korotuksen
+        noin 8%. {municipality_locative} lyhytaikainen pysäköinti on vähentynyt vuoden 2017 pysäköintimaksujen korotuksen
         jälkeen noin 10%.
-        """)
+        """))
 
         """Myös asukaspysäköintimaksujen korotus alkoi vuonna 2015 ja vuosimaksu nousee
         120 eurosta 360 euroon vuoteen 2021 mennessä. Asukaspysäköintitunnusten määrä on vuosina 2014-2019
@@ -173,9 +175,9 @@ class ModalSharePage(Page):
         df['ShareOfCarsImpacted'] *= 100
         fig.add_series(df=df, column_name='ShareOfCarsImpacted', trace_name='Osuus')
         icard.set_figure(fig)
-        icard.set_description("""
-        Helsingissä maksullisen pysäköinnin alueella asuu noin neljäsosa auton omistajista.
-        """)
+        icard.set_description(cd.render("""
+        {municipality_locative} maksullisen pysäköinnin alueella asuu nyt viidesosa auton omistajista.
+        """))
 
     def _refresh_trip_cards(self):
         df = predict_passenger_kms()
@@ -232,7 +234,9 @@ class ModalSharePage(Page):
         )
         mdf = predict_road_mileage()
         pop = predict_population()
-        card.set_description("""
+
+        cd = CardDescription()
+        card.set_description(cd.render("""
         Henkilöautojen kilometrisuorite on saatu VTT:ltä ja se pitää sisällään henkilöautoliikenteen
         Helsingin aluerajojen sisäpuolella. Henkilöautojen käyttäjämääräksi on oletettu keskimäärin
         1,2 henkilöä autossa. Joukkoliikenteen matkustajakilometrit on saatu HSL:n tilastoista. Näiden
@@ -240,7 +244,7 @@ class ModalSharePage(Page):
         noin neljäsosan linja-autoliikenteestä Helsingissä. Kävelyn ja pyöräilyn oletukset henkilökilometreistä
         perustuvat HSL:n liikkumistutkimukseen matkamääristä ja keskimääräisistä pituuksista. Pyörällä
         oletuksena on keskipituus 3,7 km ja kävelymatkalla 1,2 km.
-        """)
+        """))
 
         fc = mdf.pop('Forecast')
         df = pd.DataFrame(fc)
@@ -272,7 +276,7 @@ class ModalSharePage(Page):
         card = self.get_card('parking-emission-reductions')
         fig = PredictionFigure(
             sector_name='Transportation',
-            unit_name='kt (CO2e.)',
+            unit_name='kt (CO2e.)/a',
             fill=True,
             smoothing=True,
         )
@@ -281,6 +285,7 @@ class ModalSharePage(Page):
             df0 = predict_cars_emissions()
 
         df1 = predict_cars_emissions()
+
         df1['Emissions'] -= df0['Emissions']
         df_forecast = df1[df1.Forecast]
 

@@ -61,6 +61,7 @@ def _hash_funcs(funcs):
 
 def generate_cache_key(func, var_store=None):
     hash_data = _get_func_hash_data(func, None)
+    # print(hash_data)
 
     funcs = hash_data['funcs']
     variables = hash_data['variables']
@@ -162,7 +163,7 @@ def calcfunc(variables=None, datasets=None, funcs=None, filedeps=None):
             ret = func(*args, **kwargs)
 
             if should_profile:
-                pc.display('func ret')
+                pc.display('func ret (cache key %s)' % cache_key)
             if should_cache_func:
                 assert ret is not None
                 cache.set(cache_key, ret, timeout=600)

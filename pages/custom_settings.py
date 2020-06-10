@@ -15,7 +15,6 @@ def generate_custom_settings_list():
         return html.Pre()
 
     customized_variables = {key: val for key, val in session.items() if not key.startswith('_')}
-    print(customized_variables)
     var_str = json.dumps(customized_variables, ensure_ascii=False, indent=4)
     return html.Pre(var_str)
 
