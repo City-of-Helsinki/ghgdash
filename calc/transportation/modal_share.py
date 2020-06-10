@@ -2,12 +2,27 @@ import pandas as pd
 from calc import calcfunc
 from calc.population import get_adjusted_population_forecast
 from calc.transportation.datasets import prepare_transportation_emissions_dataset
+from calc.transportation.parking import predict_parking_fee_impact
+
+
+DATA_YEAR = 2015
+PASSENGER_KMS = 4346323463
+MODAL_SPLIT = {
+    'Walking': 6.9,
+    'Cycling': 4.6,
+    'Train': 3.7,
+    'Metro': 9.1,
+    'Tram': 2.8,
+    'Bus': 12.2,
+    'Taxi': 0.8,
+    'Car': 59.9,
+}
 
 
 @calcfunc(
     datasets=dict(
         modal_share='jyrjola/ymparistotilastot/l27_matka_kulkutapa_pks_2000_2008',
-    )
+    ),
 )
 def prepare_daily_trips_dataset(datasets):
     df = datasets['modal_share']
@@ -68,11 +83,19 @@ def prepare_daily_trips_dataset(datasets):
 
 
 @calcfunc(
-    funcs=[prepare_daily_trips_dataset, get_adjusted_population_forecast],
+    funcs=[
+        prepare_daily_trips_dataset, get_adjusted_population_forecast, predict_parking_fee_impact
+    ],
     variables=['target_year'],
 )
-def predict_trips(variables):
+def predict_passenger_kms(variables):
     df = prepare_daily_trips_dataset()
+
+    s = df.loc[DATA_YEAR]
+    m = {key: val * PASSENGER_KMS / 1000 for key, val in MODAL_SPLIT.items()}
+    passenger_kms_per_daily_trip = pd.Series(m).div(s).fillna(0)
+
+    df *= passenger_kms_per_daily_trip
 
     first_hist_year = df.index.min()
     pop = get_adjusted_population_forecast()
@@ -81,19 +104,20 @@ def predict_trips(variables):
 
     total = df.sum(axis=1)
 
-    trips_per_person = total.iloc[-1] / hist_pop.iloc[-1]
+    kms_per_resident = total.iloc[-1] / hist_pop.iloc[-1]
 
     mdf = df.div(total, axis=0)
 
     last_hist_year = mdf.index.max()
     shares = mdf.loc[last_hist_year].to_dict()  # from last historical year
 
-    CAR_MULTIPLIER = 0.99
-    TO_MODES = ['Bus', 'Cycling', 'Metro', 'Train', 'Tram']
+    pdf = predict_parking_fee_impact(skip_cache=True)
+
+    TO_MODES = ['Cycling', 'Metro', 'Train', 'Tram']
 
     for year in range(last_hist_year + 1, variables['target_year'] + 1):
         prev = shares['Car']
-        shares['Car'] *= CAR_MULTIPLIER
+        shares['Car'] *= pdf.loc[year]['CarMultiplier']
         change_per_mode = (prev - shares['Car']) / len(TO_MODES)
         for mode in TO_MODES:
             shares[mode] += change_per_mode
@@ -105,20 +129,20 @@ def predict_trips(variables):
     mdf['Population'] = pop['Population']
 
     mdf['Trips'] = total
-    mdf.loc[mdf.Forecast, 'Trips'] = trips_per_person * mdf['Population']
+    mdf.loc[mdf.Forecast, 'Trips'] = kms_per_resident * mdf['Population']
 
     fc = mdf.pop('Forecast')
     pop = mdf.pop('Population')
     total = mdf.pop('Trips')
 
     mdf = mdf.mul(total, axis=0).astype(int)
-    mdf['TripsPerResident'] = total / pop
+    mdf['KmsPerResident'] = total / pop
     mdf['Forecast'] = fc
     return mdf
 
 
 @calcfunc(
-    funcs=[predict_trips, prepare_transportation_emissions_dataset]
+    funcs=[predict_passenger_kms, prepare_transportation_emissions_dataset]
 )
 def predict_road_mileage():
     edf = prepare_transportation_emissions_dataset()[['Year', 'Vehicle', 'Road', 'Mileage']]
@@ -129,9 +153,9 @@ def predict_road_mileage():
         ('Car', 'Cars'),
     )
 
-    df = predict_trips()
+    df = predict_passenger_kms()
 
-    yearly_km_per_daily_trip = {}
+    vehicle_km_per_passenger_km = {}
 
     for mode, vehicle in MODE_VEHICLE_MAP:
         mdf = edf[edf.Vehicle == vehicle][['Road', 'Mileage']]
@@ -141,7 +165,7 @@ def predict_road_mileage():
 
         # out = mdf.groupby('Road')['KmPerTrip'].mean().dropna().to_dict()
         out = mdf[mdf.index == mdf.index.max()].set_index('Road')['KmPerTrip'].to_dict()
-        yearly_km_per_daily_trip[vehicle] = out
+        vehicle_km_per_passenger_km[vehicle] = out
 
     last_hist_year = edf.index.max()
     edf = edf.reset_index().set_index(['Year', 'Vehicle', 'Road']).unstack(['Vehicle', 'Road'])
@@ -150,7 +174,7 @@ def predict_road_mileage():
     edf = edf.reindex(range(edf.index.min(), df.index.max() + 1))
 
     for mode, vehicle in MODE_VEHICLE_MAP:
-        for road_type, per_trip in yearly_km_per_daily_trip[vehicle].items():
+        for road_type, per_trip in vehicle_km_per_passenger_km[vehicle].items():
             out = df.loc[df.index > last_hist_year, mode] * per_trip
             edf.loc[edf.index > last_hist_year, (vehicle, road_type)] = out
 
@@ -165,4 +189,5 @@ def predict_road_mileage():
 if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     df = predict_road_mileage(skip_cache=True)
-    print(df)
+    df.pop('Forecast')
+    print(df / 1000000)

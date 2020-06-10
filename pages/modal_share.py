@@ -5,9 +5,12 @@ from components.cards import ConnectedCardGrid
 from components.graphs import PredictionFigure
 from components.card_description import CardDescription
 from variables import get_variable
-from calc.transportation.modal_share import predict_trips, predict_road_mileage
-from calc.transportation.parking import predict_parking_fees
+from calc.transportation.modal_share import predict_passenger_kms, predict_road_mileage
+from calc.transportation.parking import predict_parking_fee_impact
 from .base import Page
+
+
+MAX_PARKING_FEE_INCREASE_PERC = 400
 
 
 class ModalSharePage(Page):
@@ -17,36 +20,35 @@ class ModalSharePage(Page):
     name = 'Kulkumuoto-osuudet'
 
     def make_cards(self):
-        max_perc = 400
         self.add_graph_card(
             id='parking-fee',
             title='Pysäköintimaksu',
             title_i18n=dict(en='Parking fee increase'),
             slider=dict(
                 min=0,
-                max=max_perc * 10,
+                max=MAX_PARKING_FEE_INCREASE_PERC * 10,
                 step=10 * 10,
                 value=get_variable('parking_fee_increase') * 10,
-                marks={x: '+%d %%' % (x / 10) for x in range(0, (max_perc * 10) + 1, 500)},
+                marks={x: '+%d %%' % (x / 10) for x in range(0, (MAX_PARKING_FEE_INCREASE_PERC * 10) + 1, 500)},
             ),
         )
 
         self.add_graph_card(
             id='modal-share-car',
-            title='Henkilöautoilun kulkumuoto-osuus',
-            title_i18n=dict(en='Modal share of cars'),
+            title='Henkilöautoilun osuus matkustajakilometreistä',
+            title_i18n=dict(en='Passenger mileage share of cars'),
         )
 
         self.add_graph_card(
             id='modal-shares-rest',
-            title='Muut kulkumuoto-osuudet',
-            title_i18n=dict(en='Other modal shares'),
+            title='Muiden kulkumuoto-osuudet matkustajakilometreistä',
+            title_i18n=dict(en='Shares of passenger mileage for other modes'),
         )
 
         self.add_graph_card(
-            id='number-of-trips',
-            title='Matkojen lukumäärä asukasta kohti päivässä',
-            title_i18n=dict(en='Number of trips per resident per day'),
+            id='number-of-passenger-kms',
+            title='Matkustajakilometrien määrä asukasta kohti päivässä',
+            title_i18n=dict(en='Number of passenger kms per resident per year'),
         )
 
         self.add_graph_card(
@@ -67,7 +69,7 @@ class ModalSharePage(Page):
         grid.add_card(c2a)
         c2b = self.get_card('modal-shares-rest')
         grid.add_card(c2b)
-        c2c = self.get_card('number-of-trips')
+        c2c = self.get_card('number-of-passenger-kms')
         grid.add_card(c2c)
         c1a.connect_to(c2a)
         c1a.connect_to(c2b)
@@ -76,6 +78,7 @@ class ModalSharePage(Page):
         c3 = self.get_card('car-mileage-per-resident')
         grid.add_card(c3)
         c2a.connect_to(c3)
+        c2c.connect_to(c3)
 
         return grid.render()
 
@@ -86,26 +89,31 @@ class ModalSharePage(Page):
         pcard = self.get_card('parking-fee')
         self.set_variable('parking_fee_increase', pcard.get_slider_value() // 10)
 
+        df = predict_parking_fee_impact()
+
+        last_hist_year = df[~df.Forecast].index.max()
         fig = PredictionFigure(
             sector_name='Transportation',
             unit_name='€',
             smoothing=True,
+            # y_min=df['Fees'].min(),
+            y_max=df.loc[last_hist_year]['Fees'] * (1 + MAX_PARKING_FEE_INCREASE_PERC / 100)
         )
-        df = predict_parking_fees()
         fig.add_series(df=df, column_name='Fees', trace_name='Pysäköinnin hinta')
         pcard.set_figure(fig)
 
     def _refresh_trip_cards(self):
-        df = predict_trips()
+        df = predict_passenger_kms()
 
-        card = self.get_card('number-of-trips')
+        card = self.get_card('number-of-passenger-kms')
         fig = PredictionFigure(
             sector_name='Transportation',
-            unit_name='kpl',
+            unit_name='km',
         )
-        fig.add_series(df, column_name='TripsPerResident', trace_name=_('trips p.c.'))
-        df.pop('TripsPerResident')
+        fig.add_series(df, column_name='KmsPerResident', trace_name=_('passenger kms (p.c.)'))
         card.set_figure(fig)
+        df.pop('KmsPerResident')
+
         total = df.sum(axis=1)
 
         fc = df.pop('Forecast')
@@ -131,8 +139,6 @@ class ModalSharePage(Page):
             sector_name='Transportation',
             unit_name='%',
             smoothing=True,
-            #stacked=True,
-            #fill=True,
             legend=True,
             color_scale=color_scale,
         )
