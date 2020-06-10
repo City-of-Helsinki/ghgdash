@@ -103,7 +103,10 @@ VARIABLE_DEFAULTS = {
     'cars_bev_percentage': 60,
     'cars_mileage_per_resident_adjustment': -30,
     'vehicle_fuel_bio_percentage': 30,
+
     'parking_fee_increase': 50,
+    'parking_fee_share_of_cars_impacted': 30,
+    'parking_utilization_reduction_per_parking_price_increase': 0.088,  # %/%
 
     'geothermal_heat_pump_cop': 3.2,
     'geothermal_existing_building_renovation': 1.0,  # percent per year
@@ -121,9 +124,13 @@ DEFAULT_VARIABLE_HASH = hashlib.md5(json.dumps(VARIABLE_DEFAULTS).encode('utf8')
 _allow_variable_set = False
 
 
-def set_variable(var_name, value):
+def _validate_variable_value(var_name, value):
     assert var_name in VARIABLE_DEFAULTS
     assert isinstance(value, type(VARIABLE_DEFAULTS[var_name]))
+
+
+def set_variable(var_name, value):
+    _validate_variable_value(var_name, value)
 
     if not flask.has_request_context():
         if not _allow_variable_set:
@@ -144,13 +151,13 @@ def get_variable(var_name, var_store=None):
 
     if var_store is not None:
         out = var_store.get(var_name)
+    elif var_name in _variable_overrides:
+        out = _variable_overrides[var_name]
     elif flask.has_request_context():
         if session.get('_default_variable_hash', '') != DEFAULT_VARIABLE_HASH:
             reset_variables()
         if var_name in session:
             out = session[var_name]
-    elif var_name in _variable_overrides:
-        out = _variable_overrides[var_name]
 
     if out is None:
         out = VARIABLE_DEFAULTS[var_name]
@@ -199,3 +206,23 @@ def allow_set_variable():
         yield None
     finally:
         _allow_variable_set = old
+
+
+class Undefined:
+    pass
+
+
+@contextmanager
+def override_variable(var_name, val):
+    _validate_variable_value(var_name, val)
+
+    old_val = _variable_overrides.get(var_name, Undefined)
+
+    _variable_overrides[var_name] = val
+    try:
+        yield None
+    finally:
+        if old_val == Undefined:
+            del _variable_overrides[var_name]
+        else:
+            _variable_overrides[var_name] = old_val

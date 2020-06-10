@@ -1,21 +1,21 @@
 import pandas as pd
 from calc import calcfunc
-from calc.population import get_adjusted_population_forecast
+from calc.population import predict_population
 from calc.transportation.datasets import prepare_transportation_emissions_dataset
 from calc.transportation.parking import predict_parking_fee_impact
 
 
-DATA_YEAR = 2015
-PASSENGER_KMS = 4346323463
-MODAL_SPLIT = {
-    'Walking': 6.9,
-    'Cycling': 4.6,
-    'Train': 3.7,
-    'Metro': 9.1,
-    'Tram': 2.8,
-    'Bus': 12.2,
-    'Taxi': 0.8,
-    'Car': 59.9,
+DATA_START_YEAR = 2015
+MODAL_PASSENGER_KMS = {
+    'Walking': [205697940, 278196138, 259558800, 278101968, 278101968],
+    'Cycling': [204939725.5, 241588244, 211671968, 255815761.5, 255815761.5],
+    'Train': [228959781, 239445434.2, 240799955.6, 236279184.7, 241841529.8],
+    'Metro': [400730000, 404377386.4, 426168466.6, 557828781.4, 584138125.8],
+    'Tram': [120970259.3, 123973160.3, 131807862.8, 134716581, 124330179.2],
+    'Bus (Rapid)': [62023837.5, 62721205.56, 63072824.44, 47440615.07, 40685925.02],
+    'Bus (IC)': [142654826, 142654826, 142654826, 142654826, 142654826],
+    'Bus': [413492250, 415810312.6, 418141370.4, 363656282.8, 314066789.7],
+    'Car': [2394000000, 2378988000, 2428068000, 2462400000, 2462400000],
 }
 
 
@@ -84,21 +84,19 @@ def prepare_daily_trips_dataset(datasets):
 
 @calcfunc(
     funcs=[
-        prepare_daily_trips_dataset, get_adjusted_population_forecast, predict_parking_fee_impact
+        prepare_daily_trips_dataset, predict_population, predict_parking_fee_impact
     ],
     variables=['target_year'],
 )
 def predict_passenger_kms(variables):
-    df = prepare_daily_trips_dataset()
+    # df = prepare_daily_trips_dataset()
 
-    s = df.loc[DATA_YEAR]
-    m = {key: val * PASSENGER_KMS / 1000 for key, val in MODAL_SPLIT.items()}
-    passenger_kms_per_daily_trip = pd.Series(m).div(s).fillna(0)
-
-    df *= passenger_kms_per_daily_trip
+    nr_years = len(list(MODAL_PASSENGER_KMS.values())[0])
+    df = pd.DataFrame(MODAL_PASSENGER_KMS, index=range(DATA_START_YEAR, DATA_START_YEAR + nr_years))
+    df['Bus'] += df.pop('Bus (Rapid)') + df.pop('Bus (IC)')
 
     first_hist_year = df.index.min()
-    pop = get_adjusted_population_forecast()
+    pop = predict_population()
     df['Population'] = pop['Population']
     hist_pop = df.pop('Population')
 
@@ -117,7 +115,7 @@ def predict_passenger_kms(variables):
 
     for year in range(last_hist_year + 1, variables['target_year'] + 1):
         prev = shares['Car']
-        shares['Car'] *= pdf.loc[year]['CarMultiplier']
+        shares['Car'] += pdf.loc[year]['CarModalShareChange']
         change_per_mode = (prev - shares['Car']) / len(TO_MODES)
         for mode in TO_MODES:
             shares[mode] += change_per_mode
@@ -128,12 +126,12 @@ def predict_passenger_kms(variables):
 
     mdf['Population'] = pop['Population']
 
-    mdf['Trips'] = total
-    mdf.loc[mdf.Forecast, 'Trips'] = kms_per_resident * mdf['Population']
+    mdf['PassengerKms'] = total
+    mdf.loc[mdf.Forecast, 'PassengerKms'] = kms_per_resident * mdf['Population']
 
     fc = mdf.pop('Forecast')
     pop = mdf.pop('Population')
-    total = mdf.pop('Trips')
+    total = mdf.pop('PassengerKms')
 
     mdf = mdf.mul(total, axis=0).astype(int)
     mdf['KmsPerResident'] = total / pop
@@ -155,16 +153,23 @@ def predict_road_mileage():
 
     df = predict_passenger_kms()
 
-    vehicle_km_per_passenger_km = {}
+    # edf.Mileage /= 1000000
+    # print(edf[edf.Vehicle == 'Cars'])
+    # exit()
 
+    # df.pop('Forecast')
+    # print(df / 1000000)
+    # exit()
+
+    vehicle_km_per_passenger_km = {}
     for mode, vehicle in MODE_VEHICLE_MAP:
         mdf = edf[edf.Vehicle == vehicle][['Road', 'Mileage']]
-        mdf['Trips'] = df[mode]
+        mdf['PassengerKms'] = df[mode]
         mdf = mdf.dropna()
-        mdf['KmPerTrip'] = mdf['Mileage'] / mdf['Trips']
+        mdf['VehicleKmPerPassengerKm'] = mdf['Mileage'] / mdf['PassengerKms']
 
-        # out = mdf.groupby('Road')['KmPerTrip'].mean().dropna().to_dict()
-        out = mdf[mdf.index == mdf.index.max()].set_index('Road')['KmPerTrip'].to_dict()
+        out = mdf.groupby('Road')['VehicleKmPerPassengerKm'].mean().dropna().to_dict()
+        # out = mdf[mdf.index == mdf.index.max()].set_index('Road')['VehicleKmPerPassengerKm'].to_dict()
         vehicle_km_per_passenger_km[vehicle] = out
 
     last_hist_year = edf.index.max()
@@ -188,6 +193,25 @@ def predict_road_mileage():
 
 if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
+    """
     df = predict_road_mileage(skip_cache=True)
-    df.pop('Forecast')
-    print(df / 1000000)
+    fc = df.pop('Forecast')
+    df /= 1000000
+    df['Forecast'] = fc
+    print(df)
+    """
+    from calc.transportation.cars import predict_cars_emissions
+    from variables import override_variable
+
+    with override_variable('parking_fee_share_of_cars_impacted', 0):
+        print('override')
+        print(predict_road_mileage()[[('Cars', 'Highways'), ('Cars', 'Urban')]])
+        print(predict_cars_emissions()[['Mileage', 'Emissions']])
+
+    print('no override')
+    print(predict_road_mileage()[[('Cars', 'Highways'), ('Cars', 'Urban')]])
+    print(predict_cars_emissions()[['Mileage', 'Emissions']])
+
+    #print(df)
+    #df = predict_road_mileage()
+    #print(df)

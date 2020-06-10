@@ -108,6 +108,7 @@ class Page:
     def _make_navbar(self):
         if flask.has_request_context():
             custom_setting_count = len([k for k in session.keys() if not k.startswith('_')])
+            print(session.keys())
         else:
             custom_setting_count = 0
         badge_el = None

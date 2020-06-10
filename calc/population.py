@@ -33,7 +33,7 @@ def get_population_forecast(variables, datasets):
     variables=['population_forecast_correction', 'target_year'],
     funcs=[get_population_forecast]
 )
-def get_adjusted_population_forecast(variables):
+def predict_population(variables):
     correction_perc = variables['population_forecast_correction']
     target_year = variables['target_year']
 
@@ -51,4 +51,4 @@ def get_adjusted_population_forecast(variables):
 
 
 if __name__ == '__main__':
-    print(get_adjusted_population_forecast(skip_cache=True))
+    print(predict_population(skip_cache=True))

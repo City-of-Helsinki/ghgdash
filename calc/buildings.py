@@ -2,7 +2,7 @@ import pandas as pd
 import scipy.stats
 
 from . import calcfunc
-from .population import get_adjusted_population_forecast
+from .population import predict_population
 
 
 def generate_forecast_series(historical_series, year_until):
@@ -35,7 +35,7 @@ def prepare_historical_building_area_dataset(datasets):
     variables=dict(
         target_year='target_year',
     ),
-    funcs=[prepare_historical_building_area_dataset, get_adjusted_population_forecast]
+    funcs=[prepare_historical_building_area_dataset, predict_population]
 )
 def generate_building_floor_area_forecast(variables):
     target_year = variables['target_year']
@@ -47,7 +47,7 @@ def generate_building_floor_area_forecast(variables):
     building_total.index = building_total.index.astype(int)
     building_total.columns = list(building_total.columns.get_level_values(1))
 
-    pop_s = get_adjusted_population_forecast().Population
+    pop_s = predict_population().Population
     # Replace negative population change with zero so that we don't
     # start bulldozing buildings.
     pop_diff = pop_s.diff().clip(lower=0).dropna()

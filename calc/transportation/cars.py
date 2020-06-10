@@ -1,7 +1,7 @@
 import pandas as pd
 from calc import calcfunc
 from calc.bass import generate_bass_diffusion
-from calc.population import get_adjusted_population_forecast
+from calc.population import predict_population
 from calc.electricity import predict_electricity_emission_factor
 from calc.transportation.datasets import prepare_transportation_emissions_dataset
 from calc.transportation.modal_share import predict_road_mileage
@@ -11,7 +11,7 @@ from calc.transportation.modal_share import predict_road_mileage
     variables=[
         'target_year', 'municipality_name', 'cars_mileage_per_resident_adjustment'
     ],
-    funcs=[get_adjusted_population_forecast, prepare_transportation_emissions_dataset],
+    funcs=[predict_population, prepare_transportation_emissions_dataset],
 )
 def predict_cars_mileage_old(variables):
     target_year = variables['target_year']
@@ -24,7 +24,7 @@ def predict_cars_mileage_old(variables):
     df['Forecast'] = False
     last_historical_year = df.index.max()
     df = df.reindex(range(df.index.min(), target_year + 1))
-    pop_df = get_adjusted_population_forecast()
+    pop_df = predict_population()
     df['Population'] = pop_df['Population']
     df['UrbanPerResident'] = df['Urban'] / df['Population']
     df['HighwaysPerResident'] = df['Highways'] / df['Population']
@@ -45,7 +45,7 @@ def predict_cars_mileage_old(variables):
 
 
 @calcfunc(
-    funcs=[predict_road_mileage, get_adjusted_population_forecast],
+    funcs=[predict_road_mileage, predict_population],
 )
 def predict_cars_mileage():
     mdf = predict_road_mileage()
@@ -54,7 +54,7 @@ def predict_cars_mileage():
         if vehicle == 'Cars':
             df[road] = mdf[(vehicle, road)]
 
-    pop_df = get_adjusted_population_forecast()
+    pop_df = predict_population()
 
     df['Population'] = pop_df['Population']
     df['UrbanPerResident'] = df['Urban'] / df['Population']

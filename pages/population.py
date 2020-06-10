@@ -5,7 +5,7 @@ import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 
 from variables import get_variable, set_variable
-from calc.population import get_adjusted_population_forecast
+from calc.population import predict_population
 from components.cards import GraphCard
 from components.graphs import make_layout
 from components.card_description import CardDescription
@@ -87,7 +87,7 @@ page = Page(
 )
 def population_callback(value):
     set_variable('population_forecast_correction', value)
-    pop_df = get_adjusted_population_forecast()
+    pop_df = predict_population()
     target_year = get_variable('target_year')
     pop_in_target_year = pop_df.loc[target_year].Population
     last_hist = pop_df[~pop_df.Forecast].iloc[-1]

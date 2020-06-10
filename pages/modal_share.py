@@ -4,9 +4,11 @@ from common.locale import lazy_gettext as _
 from components.cards import ConnectedCardGrid
 from components.graphs import PredictionFigure
 from components.card_description import CardDescription
-from variables import get_variable
+from variables import get_variable, set_variable, override_variable
 from calc.transportation.modal_share import predict_passenger_kms, predict_road_mileage
 from calc.transportation.parking import predict_parking_fee_impact
+from calc.transportation.cars import predict_cars_emissions
+from calc.population import predict_population
 from .base import Page
 
 
@@ -22,14 +24,27 @@ class ModalSharePage(Page):
     def make_cards(self):
         self.add_graph_card(
             id='parking-fee',
-            title='Pysäköintimaksu',
-            title_i18n=dict(en='Parking fee increase'),
+            title='Lyhytkestoisen pysäköinnin keskimääräinen hinta',
+            title_i18n=dict(en='Average cost of short-term parking'),
             slider=dict(
                 min=0,
-                max=MAX_PARKING_FEE_INCREASE_PERC * 10,
-                step=10 * 10,
-                value=get_variable('parking_fee_increase') * 10,
-                marks={x: '+%d %%' % (x / 10) for x in range(0, (MAX_PARKING_FEE_INCREASE_PERC * 10) + 1, 500)},
+                max=MAX_PARKING_FEE_INCREASE_PERC,
+                step=10,
+                value=get_variable('parking_fee_increase'),
+                marks={x: '+%d %%' % x for x in range(0, (MAX_PARKING_FEE_INCREASE_PERC) + 1, 50)},
+            ),
+        )
+
+        self.add_graph_card(
+            id='cars-affected-by-parking-fee',
+            title='Osuus autokannasta, johon pysäköintimaksun korotus kohdistuu',
+            title_i18n=dict(en='Share of cars affected by the parking fee increase'),
+            slider=dict(
+                min=0,
+                max=100,
+                step=5,
+                value=get_variable('parking_fee_share_of_cars_impacted'),
+                marks={x: '%d %%' % x for x in range(0, 101, 10)},
             ),
         )
 
@@ -53,8 +68,26 @@ class ModalSharePage(Page):
 
         self.add_graph_card(
             id='car-mileage-per-resident',
-            title='Henkilöautoilla ajetut kilometrit asukasta kohti vuodessa',
-            title_i18n=dict(en='Mileage driven with cars per resident per year'),
+            title='Henkilöautoilla ajetut kilometrit asukasta kohti',
+            title_i18n=dict(en='Mileage driven with cars per resident'),
+        )
+
+        self.add_graph_card(
+            id='car-mileage',
+            title='Henkilöautoilla ajetut kilometrit',
+            title_i18n=dict(en='Mileage driven with cars'),
+        )
+
+        self.add_graph_card(
+            id='car-emission-factor',
+            title='Henkilöautojen päästökerroin',
+            title_i18n=dict(en='Emission factor of cars'),
+        )
+
+        self.add_graph_card(
+            id='parking-emission-reductions',
+            title='Pysäköintimaksun korotuksen päästövaikutukset',
+            title_i18n=dict(en='Emission impact of parking fee increase'),
         )
 
     def get_content(self):
@@ -62,7 +95,9 @@ class ModalSharePage(Page):
 
         grid.make_new_row()
         c1a = self.get_card('parking-fee')
+        c1b = self.get_card('cars-affected-by-parking-fee')
         grid.add_card(c1a)
+        grid.add_card(c1b)
 
         grid.make_new_row()
         c2a = self.get_card('modal-share-car')
@@ -73,6 +108,8 @@ class ModalSharePage(Page):
         grid.add_card(c2c)
         c1a.connect_to(c2a)
         c1a.connect_to(c2b)
+        c1b.connect_to(c2a)
+        c1b.connect_to(c2b)
 
         grid.make_new_row()
         c3 = self.get_card('car-mileage-per-resident')
@@ -80,27 +117,65 @@ class ModalSharePage(Page):
         c2a.connect_to(c3)
         c2c.connect_to(c3)
 
+        grid.make_new_row()
+        c4a = self.get_card('car-mileage')
+        c4b = self.get_card('car-emission-factor')
+        grid.add_card(c4a)
+        grid.add_card(c4b)
+        c3.connect_to(c4a)
+
+        grid.make_new_row()
+        c5 = self.get_card('parking-emission-reductions')
+        grid.add_card(c5)
+        c4a.connect_to(c5)
+        c4b.connect_to(c5)
+
         return grid.render()
 
     def get_summary_vars(self):
         return dict()
 
-    def _refresh_parking_fee_card(self):
+    def _refresh_parking_fee_cards(self):
         pcard = self.get_card('parking-fee')
-        self.set_variable('parking_fee_increase', pcard.get_slider_value() // 10)
+        self.set_variable('parking_fee_increase', pcard.get_slider_value())
+        icard = self.get_card('cars-affected-by-parking-fee')
+        self.set_variable('parking_fee_share_of_cars_impacted', icard.get_slider_value())
 
         df = predict_parking_fee_impact()
 
         last_hist_year = df[~df.Forecast].index.max()
         fig = PredictionFigure(
             sector_name='Transportation',
-            unit_name='€',
-            smoothing=True,
+            unit_name='€/h',
+            smoothing=False,
             # y_min=df['Fees'].min(),
             y_max=df.loc[last_hist_year]['Fees'] * (1 + MAX_PARKING_FEE_INCREASE_PERC / 100)
         )
         fig.add_series(df=df, column_name='Fees', trace_name='Pysäköinnin hinta')
         pcard.set_figure(fig)
+        pcard.set_description("""
+        Oletuksena on Wienin tutkimus maksullisen pysäköinnin vaikutuksesta, jonka mukaan pysäköintimaksun
+        kaksinkertaistaminen vähentää pysäköintiä ja siten autoliikennettä siihen kohdistuvilla alueilla
+        noin 8%. Helsingissä lyhytaikainen pysäköinti on vähentynyt vuoden 2017 pysäköintimaksujen korotuksen
+        jälkeen noin 10%.
+        """)
+
+        """Myös asukaspysäköintimaksujen korotus alkoi vuonna 2015 ja vuosimaksu nousee
+        120 eurosta 360 euroon vuoteen 2021 mennessä. Asukaspysäköintitunnusten määrä on vuosina 2014-2019
+        vähentynyt noin 600 kpl vaikka asukasluku on kasvanut kantakaupungissa."""
+
+        fig = PredictionFigure(
+            sector_name='Transportation',
+            unit_name='%',
+            smoothing=False,
+            y_max=100
+        )
+        df['ShareOfCarsImpacted'] *= 100
+        fig.add_series(df=df, column_name='ShareOfCarsImpacted', trace_name='Osuus')
+        icard.set_figure(fig)
+        icard.set_description("""
+        Helsingissä maksullisen pysäköinnin alueella asuu noin neljäsosa auton omistajista.
+        """)
 
     def _refresh_trip_cards(self):
         df = predict_passenger_kms()
@@ -120,14 +195,13 @@ class ModalSharePage(Page):
         df = df.div(total, axis=0)
         df *= 100
 
-        df['Other'] += df.pop('Taxi')
+        # df['Other'] += df.pop('Taxi')
         df['Rail'] = df.pop('Metro') + df.pop('Tram') + df.pop('Train')
 
         ccard = self.get_card('modal-share-car')
         fig = PredictionFigure(
             sector_name='Transportation',
             unit_name='%',
-            smoothing=True,
         )
         fig.add_series(df=df, forecast=fc, column_name='Car', trace_name='Henkilöautot')
         ccard.set_figure(fig)
@@ -138,7 +212,6 @@ class ModalSharePage(Page):
         fig = PredictionFigure(
             sector_name='Transportation',
             unit_name='%',
-            smoothing=True,
             legend=True,
             color_scale=color_scale,
         )
@@ -149,26 +222,81 @@ class ModalSharePage(Page):
 
         mcard.set_figure(fig)
 
-    def _refresh_mileage_card(self):
+    def _refresh_mileage_cards(self):
         card = self.get_card('car-mileage-per-resident')
         fig = PredictionFigure(
             sector_name='Transportation',
-            unit_name='milj. km',
-            smoothing=True,
+            unit_name='km',
             color_scale=2,
             legend=True,
         )
         mdf = predict_road_mileage()
-        df = pd.DataFrame(mdf.pop('Forecast'))
+        pop = predict_population()
+        card.set_description("""
+        Henkilöautojen kilometrisuorite on saatu VTT:ltä ja se pitää sisällään henkilöautoliikenteen
+        Helsingin aluerajojen sisäpuolella. Henkilöautojen käyttäjämääräksi on oletettu keskimäärin
+        1,2 henkilöä autossa. Joukkoliikenteen matkustajakilometrit on saatu HSL:n tilastoista. Näiden
+        lisäksi Helsingin katuverkossa liikkuu pitkän matkan busseja sekä turistibusseja, jotka muodostavat
+        noin neljäsosan linja-autoliikenteestä Helsingissä. Kävelyn ja pyöräilyn oletukset henkilökilometreistä
+        perustuvat HSL:n liikkumistutkimukseen matkamääristä ja keskimääräisistä pituuksista. Pyörällä
+        oletuksena on keskipituus 3,7 km ja kävelymatkalla 1,2 km.
+        """)
+
+        fc = mdf.pop('Forecast')
+        df = pd.DataFrame(fc)
         for vehicle, road in list(mdf.columns):
             if vehicle == 'Cars':
-                df[road] = mdf[(vehicle, road)] / 1000000
+                df[road] = mdf[(vehicle, road)]
+                df[road + 'PerResident'] = df[road] / pop['Population']
+                df[road] /= 1000000
+
+        fig.add_series(df=df, column_name='UrbanPerResident', trace_name='Katuajo', color_idx=0)
+        fig.add_series(df=df, column_name='HighwaysPerResident', trace_name='Maantieajo', color_idx=1)
+        card.set_figure(fig)
+
+        card = self.get_card('car-mileage')
+        fig = PredictionFigure(
+            sector_name='Transportation',
+            unit_name='M km',
+            color_scale=2,
+            stacked=True,
+            fill=True,
+            legend=True,
+        )
 
         fig.add_series(df=df, column_name='Urban', trace_name='Katusuorite', color_idx=0)
         fig.add_series(df=df, column_name='Highways', trace_name='Maantiesuorite', color_idx=1)
         card.set_figure(fig)
 
+    def _refresh_emission_cards(self):
+        card = self.get_card('parking-emission-reductions')
+        fig = PredictionFigure(
+            sector_name='Transportation',
+            unit_name='kt (CO2e.)',
+            fill=True,
+            smoothing=True,
+        )
+
+        with override_variable('parking_fee_share_of_cars_impacted', 0):
+            df0 = predict_cars_emissions()
+
+        df1 = predict_cars_emissions()
+        df1['Emissions'] -= df0['Emissions']
+        df_forecast = df1[df1.Forecast]
+
+        fig.add_series(df=df_forecast, column_name='Emissions', trace_name=_('Päästöt'))
+        card.set_figure(fig)
+
+        card = self.get_card('car-emission-factor')
+        fig = PredictionFigure(
+            sector_name='Transportation',
+            unit_name='g/km',
+        )
+        fig.add_series(df=df1, column_name='EmissionFactor', trace_name=_('Päästökerroin'))
+        card.set_figure(fig)
+
     def refresh_graph_cards(self):
-        self._refresh_parking_fee_card()
+        self._refresh_parking_fee_cards()
         self._refresh_trip_cards()
-        self._refresh_mileage_card()
+        self._refresh_mileage_cards()
+        self._refresh_emission_cards()

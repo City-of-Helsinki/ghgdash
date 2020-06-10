@@ -4,7 +4,7 @@ import pandas as pd
 from utils.data import find_consecutive_start
 
 from . import calcfunc
-from .population import get_adjusted_population_forecast
+from .population import predict_population
 from .solar_power import predict_solar_power_production
 
 
@@ -69,10 +69,10 @@ def prepare_electricity_consumption_dataset(variables, datasets):
 
 @calcfunc(
     variables=['target_year', 'electricity_consumption_per_capita_adjustment'],
-    funcs=[prepare_electricity_consumption_dataset, get_adjusted_population_forecast],
+    funcs=[prepare_electricity_consumption_dataset, predict_population],
 )
 def predict_electricity_consumption(variables):
-    pop_df = get_adjusted_population_forecast()
+    pop_df = predict_population()
     target_year = variables['target_year']
 
     el_s = prepare_electricity_consumption_dataset()

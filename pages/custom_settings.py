@@ -15,6 +15,7 @@ def generate_custom_settings_list():
         return html.Pre()
 
     customized_variables = {key: val for key, val in session.items() if not key.startswith('_')}
+    print(customized_variables)
     var_str = json.dumps(customized_variables, ensure_ascii=False, indent=4)
     return html.Pre(var_str)
 
@@ -37,5 +38,6 @@ page = Page(id='custom-settings', name='Omat asetukset', content=custom_settings
     inputs=[Input('custom-settings-clear-button', 'n_clicks')]
 )
 def custom_settings_clear(n_clicks):
-    session.clear()
+    if n_clicks is not None:
+        session.clear()
     return [generate_custom_settings_list()]

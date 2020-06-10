@@ -309,7 +309,7 @@ class Graph:
             'config': dict(
                 displayModeBar=False,
                 responsive=True,
-            )
+            ),
         }
         if self.graph is not None:
             deepupdate(graph_attrs, self.graph)
