@@ -1,6 +1,6 @@
 import pandas as pd
 
-from common.locale import lazy_gettext as _
+from common.locale import lazy_gettext as _, get_active_locale
 from components.cards import ConnectedCardGrid
 from components.graphs import PredictionFigure
 from components.card_description import CardDescription
@@ -13,6 +13,14 @@ from .base import Page
 
 
 MAX_PARKING_FEE_INCREASE_PERC = 400
+
+
+MODE_TRANSLATIONS = {
+    'Rail': dict(fi='Raide'),
+    'Bus': dict(fi='Bussit'),
+    'Walking': dict(fi='Kävely'),
+    'Cycling': dict(fi='Pyöräily'),
+}
 
 
 class ModalSharePage(Page):
@@ -220,7 +228,12 @@ class ModalSharePage(Page):
         last_hist_year = fc[~fc].index.max()
         columns = list(df.loc[last_hist_year].sort_values(ascending=False).index)
         for idx, col in enumerate(columns):
-            fig.add_series(df=df, forecast=fc, column_name=col, trace_name=col, color_idx=idx)
+            name = MODE_TRANSLATIONS.get(col)
+            if name is not None:
+                name = name.get(get_active_locale())
+            if name is None:
+                name = col
+            fig.add_series(df=df, forecast=fc, column_name=col, trace_name=name, color_idx=idx)
 
         mcard.set_figure(fig)
 
