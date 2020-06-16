@@ -7,7 +7,6 @@ from calc.population import (
 )
 
 
-
 ENGINE_TYPE_MAP = {
     'Bensiini': 'gasoline',
     'Bensiini/CNG': 'gasoline',
@@ -143,7 +142,7 @@ def predict_sigmoid(s, start_year, target_year, saturation_level=1.0):
 
 
 @calcfunc(
-    variables=['target_year'],
+    variables=['target_year', 'parking_subsidy_for_evs'],
     funcs=[
         predict_cars_in_use,
         prepare_newly_registered_cars,
@@ -165,8 +164,11 @@ def predict_newly_registered_cars(variables):
     ev_total_pred = predict_sigmoid(ev_total.tail(10), last_hist_year + 1, target_year)
 
     s = df['BEV'].tail(10)
+
+    # subsidies for 5 years
+    extra_subsidy = variables['parking_subsidy_for_evs'] * 5
+
     # Take the subsidies into account based on the EV Policy Modelling Tool
-    extra_subsidy = 1000
     s[2027] = .194 + (min(extra_subsidy, 8000) / 8000) * .083
     s[2035] = .449 + (min(extra_subsidy, 8000) / 8000) * .134
     bev_pred = predict_sigmoid(s, last_hist_year + 1, target_year)

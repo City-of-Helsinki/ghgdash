@@ -108,6 +108,7 @@ VARIABLE_DEFAULTS = {
     'parking_fee_increase': 50,
     'parking_fee_share_of_cars_impacted': 25,
     'parking_utilization_reduction_per_parking_price_increase': 0.088,  # %/%
+    'parking_subsidy_for_evs': 200,  # €/year
 
     'geothermal_heat_pump_cop': 3.2,
     'geothermal_existing_building_renovation': 1.0,  # percent per year

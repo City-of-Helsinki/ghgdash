@@ -72,7 +72,6 @@ EURO_MODEL_YEARS = (
 
 
 def estimate_mileage_ratios(df, last_hist_year, target_year, bev_target_share):
-    df = predict_cars_in_use_by_engine_type()
     df = df.stack('ModelYear')
     df = df.reset_index('ModelYear')
 
@@ -117,6 +116,14 @@ def estimate_bev_unit_emissions(unit_emissions, kwh_emissions):
     df = df.reset_index().set_index(['Year', 'Road', 'Engine'])
     df = df.unstack(['Road', 'Engine']).fillna(method='pad')
 
+    for emission_class in df.columns.levels[0]:
+        for road_type in df.columns.levels[1]:
+            bev = df[(emission_class, road_type, 'electric')]
+            gas = df[(emission_class, road_type, 'gasoline')]
+            df[(emission_class, road_type, 'PHEV (gasoline)')] = (bev + gas) / 2
+
+    df = df.reindex(sorted(df.columns), axis=1)
+
     return df
 
 
@@ -133,11 +140,13 @@ def calculate_co2e_per_engine_type(mileage, ratios, unit_emissions):
 
     unit_emissions.columns.names = ('EmissionClass', 'Road', 'Engine')
 
+    last_hist_year = mileage[~mileage.Forecast].index.max()
+
     df = df * unit_emissions
+    df.loc[df.index > last_hist_year].fillna(0)
     df = df.stack('Road')
 
     df = (df.sum(axis=1) / 1000000000).unstack('Road')
-    last_hist_year = mileage[~mileage.Forecast].index.max()
     df = df.loc[df.index > last_hist_year]
     mileage.loc[mileage.index > last_hist_year, 'HighwaysEmissions'] = df['Highways']
     mileage.loc[mileage.index > last_hist_year, 'UrbanEmissions'] = df['Urban']
@@ -158,7 +167,8 @@ def calculate_co2e_per_engine_type(mileage, ratios, unit_emissions):
     funcs=[
         predict_electricity_emission_factor,
         predict_cars_mileage,
-        prepare_transportation_emissions_dataset
+        prepare_transportation_emissions_dataset,
+        predict_cars_in_use_by_engine_type
     ]
 )
 def predict_cars_emissions(datasets, variables):
@@ -178,7 +188,7 @@ def predict_cars_emissions(datasets, variables):
 
     car_unit_emissions = datasets['car_unit_emissions'].set_index(['Engine', 'Road'])
     elec_df = predict_electricity_emission_factor()
-    share_df = mileage_share_per_engine_type.copy().xs('Cars')
+    share_df = predict_cars_in_use_by_engine_type()
 
     last_hist_year = df[~df.Forecast].index.max()
 
@@ -187,6 +197,7 @@ def predict_cars_emissions(datasets, variables):
 
     # Estimate emissions per km per engine type
     unit_df = car_unit_emissions.reset_index()
+
     unit_df = unit_df.groupby(['Road', 'Engine', 'Class']).mean()['CO2e'].unstack('Class')
     unit_df['Year'] = last_hist_year
     elec_df = elec_df.loc[elec_df.index >= last_hist_year]

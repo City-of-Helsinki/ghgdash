@@ -211,23 +211,29 @@ def cars_callback(bev_percentage):
     last_forecast = df[df.Forecast].iloc[-1]
     last_history = df[~df.Forecast].iloc[-1]
 
-    mileage_change = (1 - (last_forecast.Mileage / last_history.Mileage)) * 100
+    mileage_change = ((last_forecast.PerResident / last_history.PerResident) - 1) * 100
     cd.set_values(
-        bev_percentage=get_variable('cars_bev_percentage'),
+        bev_percentage=last_forecast.electric * 100,
+        phev_percentage=last_forecast['PHEV (gasoline)'] * 100,
         bev_mileage=last_forecast.Mileage * last_forecast.electric,
+        phev_mileage=last_forecast.Mileage * last_forecast['PHEV (gasoline)'],
         per_resident_adjustment=mileage_change,
         target_population=last_forecast.Population,
+        urban_mileage=last_forecast.UrbanPerResident,
+        highway_mileage=last_forecast.HighwaysPerResident,
     )
     bev_desc = cd.render("""
         Skenaariossa polttomoottorihenkilöautot korvautuvat sähköautoilla siten,
         että vuonna {target_year} {municipality_genitive} kaduilla ja teillä
-        ajetaan sähköautoilla {bev_percentage:noround} % kaikista ajokilometreistä
-        ({bev_mileage} milj. km).
+        ajetaan täyssähköautoilla {bev_percentage} % kaikista ajokilometreistä
+        ({bev_mileage} milj. km) ja ladattavilla hybridisähköautoilla {phev_percentage}
+        % ajokilometreistä ({phev_mileage} milj. km).
     """)
     pr_desc = cd.render("""
         Vuonna {target_year} {municipality_locative} asuu {target_population} ihmistä.
         Skenaariossa ajokilometrit asukasta kohti muuttuvat vuoteen {target_year} mennessä
-        {per_resident_adjustment} %.
+        {per_resident_adjustment} %. Yksi asukas ajaa keskimäärin {urban_mileage} km kaduilla
+        ja {highway_mileage} km maanteillä vuodessa.
     """)
 
     sticky = make_bottom_bar(df)

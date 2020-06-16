@@ -25,14 +25,14 @@ class CarFleetPage(Page):
     def make_cards(self):
         self.add_graph_card(
             id='ev-parking-fee-discount',
-            title='Sähköautoille myönnetty pysäköintimaksun alennus',
+            title='Sähköautolle myönnetty pysäköintietuus',
             title_i18n=dict(en='Parking fee discount given to EVs'),
             slider=dict(
                 min=0,
-                max=100,
-                step=5,
-                value=50,
-                marks={x: '%d %%' % x for x in range(0, 101, 10)},
+                max=1000,
+                step=50,
+                value=get_variable('parking_subsidy_for_evs'),
+                marks={x: '%d €' % x for x in range(0, 1001, 100)},
             ),
         )
         self.add_graph_card(
@@ -86,12 +86,14 @@ class CarFleetPage(Page):
 
     def refresh_graph_cards(self):
         card = self.get_card('ev-parking-fee-discount')
+        self.set_variable('parking_subsidy_for_evs', card.get_slider_value())
+
         df = pd.DataFrame(data=[0.5] * 13, index=range(2010, 2023), columns=['Discount'])
         df['Forecast'] = False
         df['Discount'] *= 100
         fig = PredictionFigure(
             sector_name='Transportation',
-            unit_name='%',
+            unit_name=_('€/year'),
         )
         fig.add_series(df=df, column_name='Discount', trace_name=_('Discount'))
         card.set_figure(fig)
@@ -110,7 +112,7 @@ class CarFleetPage(Page):
         card = self.get_card('cars-per-resident')
         fig = PredictionFigure(
             sector_name='Transportation',
-            unit_name='kpl per 1 000 as.',
+            unit_name=_('cars/1,000 res.'),
             smoothing=True,
         )
         df['CarsPerResident'] *= 1000
@@ -141,16 +143,17 @@ class CarFleetPage(Page):
         df = predict_cars_in_use_by_engine_type()
         df = df.sum(axis=1, level='EngineType')
         df['Forecast'] = True
+        fc = df.pop('Forecast')
         fig = PredictionFigure(
             sector_name='Transportation',
-            unit_name='kpl',
+            unit_name=_('cars'),
             fill=True,
             stacked=True,
             legend=True,
         )
         for engine_type in ('BEV', 'PHEV', 'gasoline', 'diesel', 'other'):
             fig.add_series(
-                df=df, column_name=engine_type, trace_name=_(engine_type),
+                df=df, forecast=fc, column_name=engine_type, trace_name=_(engine_type),
                 forecast_color=ENGINE_TYPE_COLORS[engine_type]
             )
         card.set_figure(fig)
