@@ -8,7 +8,7 @@ from . import calcfunc
         pop_forecast='jyrjola/aluesarjat/hginseutu_va_ve01_vaestoennuste_pks',
     )
 )
-def get_population_forecast(variables, datasets):
+def prepare_population_forecast_dataset(variables, datasets):
     FORECAST_MADE_YEAR = 2019
 
     df = datasets['pop_forecast']
@@ -31,13 +31,13 @@ def get_population_forecast(variables, datasets):
 
 @calcfunc(
     variables=['population_forecast_correction', 'target_year'],
-    funcs=[get_population_forecast]
+    funcs=[prepare_population_forecast_dataset]
 )
 def predict_population(variables):
     correction_perc = variables['population_forecast_correction']
     target_year = variables['target_year']
 
-    df = get_population_forecast()
+    df = prepare_population_forecast_dataset()
     df = df[df.index <= target_year].copy()
     forecast = df.loc[df.Forecast]
     n_years = forecast.index.max() - forecast.index.min()

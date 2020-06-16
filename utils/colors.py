@@ -38,6 +38,14 @@ HELSINKI_COLORS = {
     'gold': '#c2a251',
 }
 
+ENGINE_TYPE_COLORS = {
+    'BEV': '#0000bf',
+    'PHEV': '#78a4c7',
+    'gasoline': '#de938c',
+    'diesel': '#bd2719',
+    'other': '#808080',
+}
+
 
 def generate_color_scale(base_color, n):
     change = 0.2

@@ -10,22 +10,24 @@ from components.card_description import CardDescription
 from components.cards import GraphCard, ConnectedCardGrid
 from .base import Page
 from .modal_share import ModalSharePage
+from .car_fleet import CarFleetPage
 
 from calc.transportation.cars import predict_cars_emissions
-from utils.colors import GHG_MAIN_SECTOR_COLORS
+from utils.colors import GHG_MAIN_SECTOR_COLORS, ENGINE_TYPE_COLORS
 
 CARS_GOAL = 119  # kt CO2e
 
 
 ENGINE_TYPES = {
-    'electric': dict(name=_('Electric'), color=GHG_MAIN_SECTOR_COLORS['ElectricityConsumption']),
-    'gasoline': dict(name=_('Gasoline'), color='#ffc61e'),
-    'diesel': dict(name=_('Diesel'), color='#bd2719'),
+    'electric': dict(name=_('Electric'), color=ENGINE_TYPE_COLORS['BEV']),
+    'PHEV (gasoline)': dict(name=_('PHEV'), color=ENGINE_TYPE_COLORS['PHEV']),
+    'gasoline': dict(name=_('Gasoline'), color=ENGINE_TYPE_COLORS['gasoline']),
+    'diesel': dict(name=_('Diesel'), color=ENGINE_TYPE_COLORS['diesel']),
 }
 
 
 def draw_bev_chart(df):
-    engines = {'electric', 'gasoline', 'diesel'}
+    engines = ['electric', 'PHEV (gasoline)', 'gasoline', 'diesel']
     df = df.dropna()[[*engines, 'Forecast']].copy()
     graph = PredictionFigure(
         sector_name='Transportation',
@@ -71,6 +73,7 @@ def generate_page():
             value=get_variable('cars_bev_percentage'),
             marks={x: '%d %%' % x for x in range(0, 100 + 1, 10)},
         ),
+        link_to_page=CarFleetPage,
     )
     per_resident_card = GraphCard(
         id='cars-mileage-per-resident',
