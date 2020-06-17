@@ -101,14 +101,15 @@ VARIABLE_DEFAULTS = {
     'solar_power_new_buildings_percentage': 90,
     'yearly_pv_energy_production_kwh_wp': 0.9,         # kWh/Wp in a year
 
-    'cars_bev_percentage': 60,
-    'cars_mileage_per_resident_adjustment': -30,
     'vehicle_fuel_bio_percentage': 30,
 
-    'parking_fee_increase': 50,
-    'parking_fee_share_of_cars_impacted': 25,
+    'residential_parking_fee_increase': 50,
+    'residential_parking_fee_share_of_cars_impacted': 25,
     'parking_utilization_reduction_per_parking_price_increase': 0.088,  # %/%
     'parking_subsidy_for_evs': 200,  # €/year
+
+    'share_of_ev_charging_station_demand_built': 50,  # %
+    'number_of_charging_stations_per_bev': 0.10,
 
     'geothermal_heat_pump_cop': 3.2,
     'geothermal_existing_building_renovation': 1.0,  # percent per year

@@ -5,6 +5,7 @@ from calc import calcfunc
 from calc.population import (
     prepare_population_forecast_dataset, predict_population
 )
+from calc.transportation.parking import predict_parking_fee_impact
 
 
 ENGINE_TYPE_MAP = {
@@ -142,11 +143,12 @@ def predict_sigmoid(s, start_year, target_year, saturation_level=1.0):
 
 
 @calcfunc(
-    variables=['target_year', 'parking_subsidy_for_evs'],
+    variables=['target_year', 'share_of_ev_charging_station_demand_built'],
     funcs=[
         predict_cars_in_use,
         prepare_newly_registered_cars,
-        predict_population
+        predict_population,
+        predict_parking_fee_impact,
     ]
 )
 def predict_newly_registered_cars(variables):
@@ -165,12 +167,19 @@ def predict_newly_registered_cars(variables):
 
     s = df['BEV'].tail(10)
 
-    # subsidies for 5 years
-    extra_subsidy = variables['parking_subsidy_for_evs'] * 5
-
+    pdf = predict_parking_fee_impact()
+    # subsidies for 10 years
+    extra_subsidy = pdf[pdf.Forecast]['ParkingSubsidyForEVs'][0:10].sum()
     # Take the subsidies into account based on the EV Policy Modelling Tool
     s[2027] = .194 + (min(extra_subsidy, 8000) / 8000) * .083
     s[2035] = .449 + (min(extra_subsidy, 8000) / 8000) * .134
+
+    stations_built_perc = variables['share_of_ev_charging_station_demand_built']
+
+    # Amount of EV charging stations impact from the EV Policy Modelling Tool
+    s[2027] += (stations_built_perc / 100) * 0.063
+    s[2035] += (stations_built_perc / 100) * 0.123
+
     bev_pred = predict_sigmoid(s, last_hist_year + 1, target_year)
 
     df = df.reindex(range(df.index.min(), target_year + 1))
@@ -179,12 +188,11 @@ def predict_newly_registered_cars(variables):
     df['EV Total'] = ev_total
     df.loc[df.index > last_hist_year, 'EV Total'] = ev_total_pred
 
-    df.loc[df.index > last_hist_year, 'PHEV'] = df['EV Total'] - df['BEV']
-
-    rest = 1 - df.pop('EV Total')
+    df.loc[df.index > last_hist_year, 'PHEV'] = (df['EV Total'] - df['BEV']).clip(lower=0)
 
     bev = df.pop('BEV')
     phev = df.pop('PHEV')
+    rest = 1 - (bev + phev)
 
     df = df.div(rest, axis=0)
     df = df.fillna(method='pad')
@@ -271,9 +279,27 @@ def predict_cars_in_use_by_engine_type(variables):
     return cars_by_model_year
 
 
+@calcfunc(
+    funcs=[
+        predict_cars_in_use_by_engine_type
+    ],
+    variables=['share_of_ev_charging_station_demand_built'],
+)
+def predict_ev_charging_station_demand(variables):
+    df = predict_cars_in_use_by_engine_type()
+    df = df.sum(axis=1, level='EngineType')
+    bev = df.pop('BEV') * 0.10
+    df = pd.DataFrame(bev.values, index=bev.index, columns=['Demand'])
+    df['Built'] = df['Demand'] * variables['share_of_ev_charging_station_demand_built'] / 100
+    df = df.astype(int)
+    df['Forecast'] = True
+    return df
+
+
 if __name__ == '__main__':
     # pd.set_option('display.max_rows', None)
-    df = predict_cars_in_use_by_engine_type(skip_cache=True)
-    #print(df)
-    print(df.sum(axis=1, level='EngineType'))
+    # df = predict_cars_in_use(skip_cache=True)
+    df = predict_ev_charging_station_demand(skip_cache=True)
+    print(df)
+    #print(df.sum(axis=1, level='EngineType'))
     exit()

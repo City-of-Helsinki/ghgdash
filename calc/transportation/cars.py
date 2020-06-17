@@ -8,6 +8,7 @@ from calc.transportation.modal_share import predict_road_mileage
 from calc.transportation.car_fleet import predict_cars_in_use_by_engine_type
 
 
+"""
 @calcfunc(
     variables=[
         'target_year', 'municipality_name', 'cars_mileage_per_resident_adjustment'
@@ -43,6 +44,7 @@ def predict_cars_mileage_old(variables):
     df.Forecast = df.Forecast.astype(bool)
 
     return df
+"""
 
 
 @calcfunc(
@@ -71,7 +73,7 @@ EURO_MODEL_YEARS = (
 )
 
 
-def estimate_mileage_ratios(df, last_hist_year, target_year, bev_target_share):
+def estimate_mileage_ratios(df):
     df = df.stack('ModelYear')
     df = df.reset_index('ModelYear')
 
@@ -162,7 +164,6 @@ def calculate_co2e_per_engine_type(mileage, ratios, unit_emissions):
     ),
     variables=[
         'target_year', 'municipality_name',
-        'cars_bev_percentage'
     ],
     funcs=[
         predict_electricity_emission_factor,
@@ -173,7 +174,6 @@ def calculate_co2e_per_engine_type(mileage, ratios, unit_emissions):
 )
 def predict_cars_emissions(datasets, variables):
     target_year = variables['target_year']
-    bev_percentage = variables['cars_bev_percentage']
 
     mileage_per_engine_type = datasets['mileage_per_engine_type']
     mileage_share_per_engine_type = mileage_per_engine_type.set_index(['Vehicle', 'Engine']).drop(columns='Sum')
@@ -193,7 +193,7 @@ def predict_cars_emissions(datasets, variables):
     last_hist_year = df[~df.Forecast].index.max()
 
     # Estimate mileage ratio shares between engine types
-    share = estimate_mileage_ratios(share_df, last_hist_year, target_year, bev_percentage / 100.0)
+    share = estimate_mileage_ratios(share_df)
 
     # Estimate emissions per km per engine type
     unit_df = car_unit_emissions.reset_index()

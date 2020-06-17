@@ -31,27 +31,27 @@ class ModalSharePage(Page):
 
     def make_cards(self):
         self.add_graph_card(
-            id='parking-fee',
-            title='Lyhytkestoisen pysäköinnin keskimääräinen hinta',
-            title_i18n=dict(en='Average cost of short-term parking'),
+            id='residential-parking-fee',
+            title='Asukaspysäköinnin hinta',
+            title_i18n=dict(en='Cost of residential parking'),
             slider=dict(
                 min=0,
                 max=MAX_PARKING_FEE_INCREASE_PERC,
                 step=10,
-                value=get_variable('parking_fee_increase'),
+                value=get_variable('residential_parking_fee_increase'),
                 marks={x: '+%d %%' % x for x in range(0, (MAX_PARKING_FEE_INCREASE_PERC) + 1, 50)},
             ),
         )
 
         self.add_graph_card(
-            id='cars-affected-by-parking-fee',
-            title='Osuus autokannasta, johon pysäköintimaksun korotus kohdistuu',
-            title_i18n=dict(en='Share of cars affected by the parking fee increase'),
+            id='cars-affected-by-residential-parking-fee',
+            title='Osuus autokannasta, johon asukaspysäköintimaksun korotus kohdistuu',
+            title_i18n=dict(en='Share of cars affected by the residential parking fee increase'),
             slider=dict(
                 min=0,
                 max=100,
                 step=5,
-                value=get_variable('parking_fee_share_of_cars_impacted'),
+                value=get_variable('residential_parking_fee_share_of_cars_impacted'),
                 marks={x: '%d %%' % x for x in range(0, 101, 10)},
             ),
         )
@@ -102,8 +102,8 @@ class ModalSharePage(Page):
         grid = ConnectedCardGrid()
 
         grid.make_new_row()
-        c1a = self.get_card('parking-fee')
-        c1b = self.get_card('cars-affected-by-parking-fee')
+        c1a = self.get_card('residential-parking-fee')
+        c1b = self.get_card('cars-affected-by-residential-parking-fee')
         grid.add_card(c1a)
         grid.add_card(c1b)
 
@@ -144,10 +144,10 @@ class ModalSharePage(Page):
         return dict()
 
     def _refresh_parking_fee_cards(self):
-        pcard = self.get_card('parking-fee')
-        self.set_variable('parking_fee_increase', pcard.get_slider_value())
-        icard = self.get_card('cars-affected-by-parking-fee')
-        self.set_variable('parking_fee_share_of_cars_impacted', icard.get_slider_value())
+        pcard = self.get_card('residential-parking-fee')
+        self.set_variable('residential_parking_fee_increase', pcard.get_slider_value())
+        icard = self.get_card('cars-affected-by-residential-parking-fee')
+        self.set_variable('residential_parking_fee_share_of_cars_impacted', icard.get_slider_value())
 
         cd = CardDescription()
         df = predict_parking_fee_impact()
@@ -155,24 +155,23 @@ class ModalSharePage(Page):
         last_hist_year = df[~df.Forecast].index.max()
         fig = PredictionFigure(
             sector_name='Transportation',
-            unit_name='€/h',
+            unit_name=_('€/year'),
             smoothing=False,
             # y_min=df['Fees'].min(),
-            y_max=df.loc[last_hist_year]['Fees'] * (1 + MAX_PARKING_FEE_INCREASE_PERC / 100)
+            y_max=df.loc[last_hist_year]['ResidentialFees'] * (1 + MAX_PARKING_FEE_INCREASE_PERC / 100)
         )
-        fig.add_series(df=df, column_name='Fees', trace_name='Pysäköinnin hinta')
+        fig.add_series(df=df, column_name='ResidentialFees', trace_name='Asukaspysäköinnin hinta')
         pcard.set_figure(fig)
 
         pcard.set_description(cd.render("""
         Oletuksena on Wienin tutkimus maksullisen pysäköinnin vaikutuksesta, jonka mukaan pysäköintimaksun
         kaksinkertaistaminen vähentää pysäköintiä ja siten autoliikennettä siihen kohdistuvilla alueilla
-        noin 8%. {municipality_locative} lyhytaikainen pysäköinti on vähentynyt vuoden 2017 pysäköintimaksujen korotuksen
-        jälkeen noin 10%.
-        """))
+        noin 8%. Asukaspysäköintimaksujen korotus alkoi vuonna 2015 ja vuosimaksu nousee
+        120 eurosta 360 euroon vuoteen 2021 mennessä. Asukaspysäköintitunnusten määrä on vuosina 2014–2019
+        vähentynyt noin 600 kpl vaikka asukasluku on kasvanut kantakaupungissa."""))
 
-        """Myös asukaspysäköintimaksujen korotus alkoi vuonna 2015 ja vuosimaksu nousee
-        120 eurosta 360 euroon vuoteen 2021 mennessä. Asukaspysäköintitunnusten määrä on vuosina 2014-2019
-        vähentynyt noin 600 kpl vaikka asukasluku on kasvanut kantakaupungissa."""
+        """{municipality_locative} lyhytaikainen pysäköinti on vähentynyt vuoden 2017 pysäköintimaksujen korotuksen
+        jälkeen noin 10%."""
 
         fig = PredictionFigure(
             sector_name='Transportation',
@@ -180,11 +179,11 @@ class ModalSharePage(Page):
             smoothing=False,
             y_max=100
         )
-        df['ShareOfCarsImpacted'] *= 100
-        fig.add_series(df=df, column_name='ShareOfCarsImpacted', trace_name='Osuus')
+        df['ResidentialShareOfCarsImpacted'] *= 100
+        fig.add_series(df=df, column_name='ResidentialShareOfCarsImpacted', trace_name='Osuus')
         icard.set_figure(fig)
         icard.set_description(cd.render("""
-        {municipality_locative} maksullisen pysäköinnin alueella asuu nyt viidesosa auton omistajista.
+        {municipality_locative} asukaspysäköinnin alueella asuu nyt n. viidesosa auton omistajista.
         """))
 
     def _refresh_trip_cards(self):
@@ -294,7 +293,7 @@ class ModalSharePage(Page):
             smoothing=True,
         )
 
-        with override_variable('parking_fee_share_of_cars_impacted', 0):
+        with override_variable('residential_parking_fee_share_of_cars_impacted', 0):
             df0 = predict_cars_emissions()
 
         df1 = predict_cars_emissions()

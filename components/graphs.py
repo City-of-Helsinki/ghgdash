@@ -133,6 +133,7 @@ class PredictionFigure:
     legend: bool = False
     legend_x: float = None
     color_scale: int = None
+    size: str = None
 
     def __post_init__(self):
         self.series_list = []
@@ -275,6 +276,10 @@ class PredictionFigure:
         if self.title:
             layout_args['title'] = self.title
 
+        if self.size == 'small':
+            height = 200
+        else:
+            height = 450
         layout = make_layout(
             yaxis=dict(
                 title=self.unit_name,
@@ -282,7 +287,7 @@ class PredictionFigure:
             ),
             xaxis=xattrs,
             hovermode='closest',
-            height=450,
+            height=height,
             transition={'duration': 500},
             **layout_args,
         )

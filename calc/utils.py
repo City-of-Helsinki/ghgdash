@@ -14,6 +14,11 @@ from common import cache
 _dataset_cache = {}
 
 
+_global_state = {
+    'debug': False
+}
+
+
 def ensure_imported(func):
     if isinstance(func, str):
         paths = func.split('.')
@@ -49,6 +54,10 @@ def _get_func_hash_data(func, seen_funcs):
 
 
 def _hash_funcs(funcs):
+    if _global_state['debug']:
+        print(funcs)
+        _global_state['debug'] = False
+
     m = hashlib.md5()
     for f in funcs:
         m.update(f.__code__.co_code)
@@ -116,6 +125,9 @@ def calcfunc(variables=None, datasets=None, funcs=None, filedeps=None):
             if should_profile:
                 pc = PerfCounter('%s.%s' % (func.__module__, func.__name__))
                 pc.display('enter')
+
+            # if func.__name__ == 'predict_ev_charging_station_demand':
+            #    _global_state['debug'] = True
 
             cache_key = generate_cache_key(func, var_store=var_store)
 

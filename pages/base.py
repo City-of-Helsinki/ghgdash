@@ -67,6 +67,11 @@ class Page:
 
         return (inputs, outputs)
 
+    def has_inputs(self):
+        for card in self.graph_cards.values():
+            if card.slider:
+                return True
+
     def handle_callback(self, inputs):
         self.make_cards()
 
@@ -192,8 +197,14 @@ class Page:
     def make_cards(self):
         pass
 
+    def refresh_graph_cards(self):
+        pass
+
     def render(self):
         self.make_cards()
+        if not self.has_inputs():
+            self.refresh_graph_cards()
+
         return html.Div(self._make_page_contents(), id=self.make_id('page-content'))
 
     def add_graph_card(self, id, **kwargs):
