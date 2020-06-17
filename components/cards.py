@@ -99,7 +99,7 @@ class GraphCard(ConnectedCardBase):
             header_el,
             dbc.CardBody(children=[
                 graph_el,
-                dbc.Row(id=self.id + '-description'),
+                dbc.Row(children=self.render_description(), id=self.id + '-description'),
                 self.extra_content,
             ])],
             className=' '.join(classes),
@@ -119,6 +119,12 @@ class GraphCard(ConnectedCardBase):
 
     def get_description(self):
         return self.description
+
+    def render_description(self):
+        if self.description is None:
+            return None
+
+        return dbc.Col(self.description, style=dict(minHeight='8rem'))
 
     def set_slider_value(self, val):
         self.slider['value'] = val

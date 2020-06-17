@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-06-08 11:52+0300\n"
+"POT-Creation-Date: 2020-06-17 15:51+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,19 +34,111 @@ msgstr ""
 msgid "Emissions in year %(year)d"
 msgstr ""
 
-#: pages/cars.py:20
-msgid "Electric"
+#: pages/car_fleet.py:128
+msgid "Emission reductions"
 msgstr ""
 
-#: pages/cars.py:21
+#: pages/car_fleet.py:129
+msgid "Net emission reductions"
+msgstr ""
+
+#: pages/car_fleet.py:138 pages/modal_share.py:158
+msgid "€/year"
+msgstr ""
+
+#: pages/car_fleet.py:141
+msgid "Yearly subsidy"
+msgstr ""
+
+#: pages/car_fleet.py:150
+msgid "charging stations"
+msgstr ""
+
+#: pages/car_fleet.py:153
+msgid "Built"
+msgstr ""
+
+#: pages/car_fleet.py:154
+msgid "Demand"
+msgstr ""
+
+#: pages/car_fleet.py:165
+msgid "Turnover"
+msgstr ""
+
+#: pages/car_fleet.py:171
+msgid "cars/1,000 res."
+msgstr ""
+
+#: pages/car_fleet.py:175
+msgid "Cars"
+msgstr ""
+
+#: pages/car_fleet.py:206
+msgid "cars"
+msgstr ""
+
+#: pages/car_fleet.py:231
+msgid "Emission factor with actions"
+msgstr ""
+
+#: pages/car_fleet.py:234
+msgid "Emission factor without actions"
+msgstr ""
+
+#: pages/car_fleet.py:243
+msgid "M km"
+msgstr ""
+
+#: pages/car_fleet.py:247 pages/cars.py:149
+msgid "Vehicle mileage"
+msgstr ""
+
+#: pages/car_fleet.py:257
+msgid "kt/a"
+msgstr ""
+
+#: pages/car_fleet.py:260
+msgid "Reductions"
+msgstr ""
+
+#: pages/cars.py:14 pages/cars.py:15
+msgid "BEV"
+msgstr ""
+
+#: pages/cars.py:16 pages/cars.py:17
+msgid "PHEV"
+msgstr ""
+
+#: pages/cars.py:18
 msgid "Gasoline"
 msgstr ""
 
-#: pages/cars.py:22
+#: pages/cars.py:19
 msgid "Diesel"
+msgstr ""
+
+#: pages/cars.py:20
+msgid "Other"
+msgstr ""
+
+#: pages/cars.py:128
+msgid "Vehicle mileage/res."
+msgstr ""
+
+#: pages/cars.py:138 pages/modal_share.py:312
+msgid "Emission factor"
+msgstr ""
+
+#: pages/cars.py:160 pages/modal_share.py:304
+msgid "Emissions"
 msgstr ""
 
 #: pages/custom_settings.py:27
 msgid "Clear"
+msgstr ""
+
+#: pages/modal_share.py:197
+msgid "passenger kms (p.c.)"
 msgstr ""
 

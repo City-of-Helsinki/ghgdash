@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-06-08 11:52+0300\n"
+"POT-Creation-Date: 2020-06-17 15:51+0300\n"
 "PO-Revision-Date: 2020-06-02 18:12+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fi\n"
@@ -35,19 +35,114 @@ msgstr "Yhteensä"
 msgid "Emissions in year %(year)d"
 msgstr "Päästöt vuonna %(year)d"
 
-#: pages/cars.py:20
-msgid "Electric"
-msgstr "Sähkö"
+#: pages/car_fleet.py:128
+msgid "Emission reductions"
+msgstr "Päästövähennykset"
 
-#: pages/cars.py:21
+#: pages/car_fleet.py:129
+msgid "Net emission reductions"
+msgstr "Nettopäästövähennykset"
+
+#: pages/car_fleet.py:138 pages/modal_share.py:158
+msgid "€/year"
+msgstr "€/vuosi"
+
+#: pages/car_fleet.py:141
+msgid "Yearly subsidy"
+msgstr "Vuosittainen alennus"
+
+#: pages/car_fleet.py:150
+msgid "charging stations"
+msgstr "latauspistettä"
+
+#: pages/car_fleet.py:153
+msgid "Built"
+msgstr "Rakennettu"
+
+#: pages/car_fleet.py:154
+msgid "Demand"
+msgstr "Tarvitaan"
+
+#: pages/car_fleet.py:165
+msgid "Turnover"
+msgstr "Uusiutuminen"
+
+#: pages/car_fleet.py:171
+msgid "cars/1,000 res."
+msgstr "autoa/1 000 as."
+
+#: pages/car_fleet.py:175
+msgid "Cars"
+msgstr "Autoa"
+
+#: pages/car_fleet.py:206
+msgid "cars"
+msgstr "autoa"
+
+#: pages/car_fleet.py:231
+msgid "Emission factor with actions"
+msgstr "Päästökerroin toimenpiteillä"
+
+#: pages/car_fleet.py:234
+msgid "Emission factor without actions"
+msgstr "Päästökerroin ilman toimenpiteitä"
+
+#: pages/car_fleet.py:243
+msgid "M km"
+msgstr "milj. km"
+
+#: pages/car_fleet.py:247 pages/cars.py:149
+msgid "Vehicle mileage"
+msgstr "Ajosuorite"
+
+#: pages/car_fleet.py:257
+msgid "kt/a"
+msgstr "kt/vuosi"
+
+#: pages/car_fleet.py:260
+msgid "Reductions"
+msgstr "Vähennykset"
+
+#: pages/cars.py:14 pages/cars.py:15
+msgid "BEV"
+msgstr "Täyssähkö"
+
+#: pages/cars.py:16 pages/cars.py:17
+msgid "PHEV"
+msgstr "PHEV"
+
+#: pages/cars.py:18
 msgid "Gasoline"
 msgstr "Bensiini"
 
-#: pages/cars.py:22
+#: pages/cars.py:19
 msgid "Diesel"
 msgstr "Diesel"
+
+#: pages/cars.py:20
+msgid "Other"
+msgstr "Muu"
+
+#: pages/cars.py:128
+msgid "Vehicle mileage/res."
+msgstr "Ajosuorite per as."
+
+#: pages/cars.py:138 pages/modal_share.py:312
+msgid "Emission factor"
+msgstr "Päästökerroin"
+
+#: pages/cars.py:160 pages/modal_share.py:304
+msgid "Emissions"
+msgstr "Päästöt"
 
 #: pages/custom_settings.py:27
 msgid "Clear"
 msgstr "Tyhjennä"
+
+#: pages/modal_share.py:197
+msgid "passenger kms (p.c.)"
+msgstr "matkustaja-km (per as.)"
+
+#~ msgid "Electric"
+#~ msgstr "Sähkö"
 

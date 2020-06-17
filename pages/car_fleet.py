@@ -10,6 +10,7 @@ from calc.transportation.car_fleet import (
     predict_ev_charging_station_demand
 )
 from utils.colors import ENGINE_TYPE_COLORS
+from .cars import ENGINE_TYPES
 from .base import Page
 
 
@@ -20,6 +21,8 @@ class CarFleetPage(Page):
     name = 'Ajoneuvokanta'
 
     def make_cards(self):
+        from .modal_share import ModalSharePage
+
         self.add_graph_card(
             id='ev-parking-fee-discount',
             title='Sähköautolle myönnetty pysäköintietuus',
@@ -64,6 +67,19 @@ class CarFleetPage(Page):
             title='Liikennekäytössä olevat henkilöautot',
             title_i18n=dict(en='Cars registered for transportation'),
         )
+
+        self.add_graph_card(
+            id='mileage',
+            title='%s ajetut henkilöautokilometrit' % get_variable('municipality_locative'),
+            title_i18n=dict(en='%s ajetut henkilöautokilometrit' % get_variable('municipality_name')),
+            link_to_page=ModalSharePage,
+        )
+        self.add_graph_card(
+            id='emission-factor',
+            title='Henkilöautojen päästökerroin',
+            title_i18n=dict(en='Emission factor of cars'),
+        )
+
         self.add_graph_card(
             id='emission-impact',
             title='Toimenpiteiden päästövaikutukset',
@@ -97,9 +113,17 @@ class CarFleetPage(Page):
         c2b.connect_to(c3)
 
         grid.make_new_row()
-        c4 = self.get_card('emission-impact')
-        grid.add_card(c4)
-        c3.connect_to(c4)
+        c4a = self.get_card('emission-factor')
+        c4b = self.get_card('mileage')
+        grid.add_card(c4a)
+        grid.add_card(c4b)
+        c3.connect_to(c4a)
+
+        grid.make_new_row()
+        c5 = self.get_card('emission-impact')
+        grid.add_card(c5)
+        c4a.connect_to(c5)
+        c4b.connect_to(c5)
 
         return grid.render()
 
@@ -126,7 +150,7 @@ class CarFleetPage(Page):
         df = predict_ev_charging_station_demand()
         fig = PredictionFigure(
             sector_name='Transportation',
-            unit_name=_('stations'),
+            unit_name=_('charging stations'),
             color_scale=2,
         )
         fig.add_series(df=df, column_name='Built', trace_name=_('Built'), color_idx=0)
@@ -168,9 +192,10 @@ class CarFleetPage(Page):
             legend=True,
         )
         for engine_type in ('BEV', 'PHEV', 'gasoline', 'diesel', 'other'):
+            et = ENGINE_TYPES[engine_type]
             fig.add_series(
                 df=df, forecast=fc, column_name=engine_type,
-                trace_name=_(engine_type), historical_color=ENGINE_TYPE_COLORS[engine_type]
+                trace_name=et['name'], historical_color=et['color']
             )
         card.set_figure(fig)
 
@@ -193,13 +218,43 @@ class CarFleetPage(Page):
             )
         card.set_figure(fig)
 
-        card = self.get_card('emission-impact')
+        df = predict_cars_emissions()
         with override_variable('share_of_ev_charging_station_demand_built', 0):
             with override_variable('parking_subsidy_for_evs', 0):
                 df0 = predict_cars_emissions()
-        df_action = predict_cars_emissions()
 
-        df0['Emissions'] -= df_action['Emissions']
+        card = self.get_card('emission-factor')
+        fig = PredictionFigure(
+            sector_name='Transportation',
+            unit_name='g/km',
+            color_scale=2,
+            legend=True,
+            legend_x=0.6,
+        )
+        fig.add_series(
+            df=df, column_name='EmissionFactor', trace_name=_('Emission factor with actions'), color_idx=0
+        )
+        fig.add_series(
+            df=df0, column_name='EmissionFactor', trace_name=_('Emission factor without actions'),
+            color_idx=1
+        )
+        card.set_figure(fig)
+
+        df.Mileage /= 1000000
+        card = self.get_card('mileage')
+        fig = PredictionFigure(
+            sector_name='Transportation',
+            unit_name=_('M km'),
+            fill=True,
+        )
+        fig.add_series(
+            df=df, column_name='Mileage', trace_name=_('Vehicle mileage'),
+        )
+        card.set_figure(fig)
+
+        card = self.get_card('emission-impact')
+
+        df0['Emissions'] -= df['Emissions']
         df0 = df0[df0.Forecast]
         fig = PredictionFigure(
             sector_name='Transportation',

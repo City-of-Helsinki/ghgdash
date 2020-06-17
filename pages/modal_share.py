@@ -30,6 +30,8 @@ class ModalSharePage(Page):
     name = 'Kulkumuoto-osuudet'
 
     def make_cards(self):
+        from .car_fleet import CarFleetPage
+
         self.add_graph_card(
             id='residential-parking-fee',
             title='Asukaspysäköinnin hinta',
@@ -90,6 +92,7 @@ class ModalSharePage(Page):
             id='car-emission-factor',
             title='Henkilöautojen päästökerroin',
             title_i18n=dict(en='Emission factor of cars'),
+            link_to_page=CarFleetPage,
         )
 
         self.add_graph_card(
@@ -301,7 +304,7 @@ class ModalSharePage(Page):
         df1['Emissions'] -= df0['Emissions']
         df_forecast = df1[df1.Forecast]
 
-        fig.add_series(df=df_forecast, column_name='Emissions', trace_name=_('Päästöt'))
+        fig.add_series(df=df_forecast, column_name='Emissions', trace_name=_('Emissions'))
         card.set_figure(fig)
 
         card = self.get_card('car-emission-factor')
@@ -309,7 +312,7 @@ class ModalSharePage(Page):
             sector_name='Transportation',
             unit_name='g/km',
         )
-        fig.add_series(df=df1, column_name='EmissionFactor', trace_name=_('Päästökerroin'))
+        fig.add_series(df=df1, column_name='EmissionFactor', trace_name=_('Emission factor'))
         card.set_figure(fig)
 
     def refresh_graph_cards(self):

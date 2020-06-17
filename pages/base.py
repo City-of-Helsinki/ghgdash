@@ -88,10 +88,7 @@ class Page:
         self.refresh_graph_cards()
         outputs = []
         for card in output_cards:
-            desc = card.get_description()
-            if desc is not None:
-                desc = dbc.Col(desc, style=dict(minHeight='8rem'))
-            outputs.append(desc)
+            outputs.append(card.render_description())
             fig = card.get_figure()
             outputs.append(fig)
 
