@@ -26,8 +26,9 @@ ENGINE_TYPE_MAP = {
     variables=['municipality_name'],
 )
 def prepare_newly_registered_cars(variables, datasets):
-    df = datasets['newly_registered_cars']
+    df = datasets['newly_registered_cars'].copy()
     df.Vuosi = df.Vuosi.astype(int)
+    print(df.Käyttövoima.unique())
     df.Käyttövoima = df.Käyttövoima.map(lambda x: ENGINE_TYPE_MAP.get(x, 'other'))
     assert len(df.Käyttövoima.unique()) > 4
     df = df.rename(columns=dict(Käyttövoima='EngineType', Vuosi='Year'))
