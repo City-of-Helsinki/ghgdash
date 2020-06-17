@@ -155,7 +155,7 @@ def predict_newly_registered_cars(variables):
     target_year = variables['target_year']
     nr_cars = predict_cars_in_use()
 
-    df = prepare_newly_registered_cars()
+    df = prepare_newly_registered_cars().copy()
     df['PHEV'] = df.pop('PHEV/diesel') + df.pop('PHEV/gasoline')
 
     total = df.sum(axis=1)
