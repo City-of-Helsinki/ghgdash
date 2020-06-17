@@ -143,6 +143,14 @@ class CarFleetPage(Page):
         )
         fig.add_series(df=df, column_name='ParkingSubsidyForEVs', trace_name=_('Yearly subsidy'))
         card.set_figure(fig)
+        cd = CardDescription()
+        cd.set_values(
+            parking_subsidy_for_evs=get_variable('parking_subsidy_for_evs')
+        )
+        card.set_description(cd.render("""
+            Skenaariossa täyssähköautoille myönnetään pysäköintietuuksia
+            jatkossa yhteensä {parking_subsidy_for_evs} €/vuosi.
+        """))
 
         card = self.get_card('share-of-ev-charging-stations-built')
         self.set_variable('share_of_ev_charging_station_demand_built', card.get_slider_value())
@@ -157,6 +165,19 @@ class CarFleetPage(Page):
         fig.add_series(df=df, column_name='Demand', trace_name=_('Demand'), color_idx=1)
         card.set_figure(fig)
 
+        cd.set_values(
+            stations_per_bev=int(get_variable('number_of_charging_stations_per_bev') * 100),
+            share_stations=get_variable('share_of_ev_charging_station_demand_built'),
+            built=df.iloc[-1].Built,
+            demand=df.iloc[-1].Demand,
+        )
+        card.set_description(cd.render("""
+            Täyssähköautoihin siirtyminen on nopeinta, kun julkisia latauspisteitä
+            rakennetaan {stations_per_bev:noround} kpl jokaista 100 sähköautoa kohti. Skenaariossa
+            tästä määrästä rakennetaan {share_stations} %. Vuonna {target_year} olisi
+            tarve {demand} latauspisteelle ja rakennettuna on {built} latauspistettä.
+        """))
+
         card = self.get_card('yearly-fleet-turnover')
         df = predict_cars_in_use()
         fig = PredictionFigure(
@@ -167,6 +188,14 @@ class CarFleetPage(Page):
         df['YearlyTurnover'] *= 100
         fig.add_series(df=df, column_name='YearlyTurnover', trace_name=_('Turnover'))
         card.set_figure(fig)
+        cd.set_values(
+            mean_yearly_turnover=df[~df.Forecast]['YearlyTurnover'].tail(8).mean()
+        )
+        card.set_description(cd.render("""
+            Viime vuosina {municipality_locative} henkilöautokannasta uusittiin noin
+            {mean_yearly_turnover} % vuodessa. Laskentamallissa oletataan, että
+            uusiutumisnopeus ei juuri muutu.
+        """))
 
         card = self.get_card('cars-per-resident')
         fig = PredictionFigure(
@@ -177,6 +206,15 @@ class CarFleetPage(Page):
         df['CarsPerResident'] *= 1000
         fig.add_series(df=df, column_name='CarsPerResident', trace_name=_('Cars'))
         card.set_figure(fig)
+        cd.set_values(
+            cars_in_use=df[~df.Forecast]['NumberOfCars'].iloc[-1],
+            cars_in_use_year=df[~df.Forecast].index.max(),
+        )
+        card.set_description(cd.render("""
+            Laskentamallissa tarkastellaan ainoastaan liikennekäyttöön rekisteröityjä
+            henkilöautoja. Vuonna {cars_in_use_year} {municipality_locative} oli liikennekäytössä
+            {cars_in_use} henkilöautoa.
+        """))
 
         card = self.get_card('newly-registered-evs')
         df = predict_newly_registered_cars()
@@ -198,6 +236,16 @@ class CarFleetPage(Page):
                 trace_name=et['name'], historical_color=et['color']
             )
         card.set_figure(fig)
+        cd.set_values(
+            bev_share=df[~fc]['BEV'].iloc[-1],
+            phev_share=df[~fc]['PHEV'].iloc[-1],
+            hist_year=df[~fc].index.max(),
+        )
+        card.set_description(cd.render("""
+            Vuonna {hist_year} {municipality_genitive} ensirekisteröidyistä
+            henkilöautoista {bev_share} % oli täyssähköautoja (BEV) ja
+            {phev_share} % ladattavia hybridiautoja (PHEV).
+        """))
 
         card = self.get_card('car-fleet')
         df = predict_cars_in_use_by_engine_type()
@@ -254,14 +302,14 @@ class CarFleetPage(Page):
 
         card = self.get_card('emission-impact')
 
-        df0['Emissions'] -= df['Emissions']
-        df0 = df0[df0.Forecast]
+        df['Emissions'] -= df0['Emissions']
+        df = df[df.Forecast]
         fig = PredictionFigure(
             sector_name='Transportation',
             unit_name=_('kt/a'),
             fill=True,
         )
-        fig.add_series(df=df0, column_name='Emissions', trace_name=_('Reductions'))
-        self.net_emissions_impact = df0['Emissions'].sum()
-        self.yearly_emissions_impact = df0['Emissions'].iloc[-1]
+        fig.add_series(df=df, column_name='Emissions', trace_name=_('Reductions'))
+        self.net_emissions_impact = df['Emissions'].sum()
+        self.yearly_emissions_impact = df['Emissions'].iloc[-1]
         card.set_figure(fig)

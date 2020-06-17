@@ -144,7 +144,7 @@ class ModalSharePage(Page):
         return grid.render()
 
     def get_summary_vars(self):
-        return dict()
+        return dict(label=_('Emission reductions'), value=self.yearly_emissions_impact, unit='kt/a')
 
     def _refresh_parking_fee_cards(self):
         pcard = self.get_card('residential-parking-fee')
@@ -169,7 +169,7 @@ class ModalSharePage(Page):
         pcard.set_description(cd.render("""
         Oletuksena on Wienin tutkimus maksullisen pysäköinnin vaikutuksesta, jonka mukaan pysäköintimaksun
         kaksinkertaistaminen vähentää pysäköintiä ja siten autoliikennettä siihen kohdistuvilla alueilla
-        noin 8%. Asukaspysäköintimaksujen korotus alkoi vuonna 2015 ja vuosimaksu nousee
+        noin 8,8 %. Asukaspysäköintimaksujen korotus alkoi vuonna 2015 ja vuosimaksu nousee
         120 eurosta 360 euroon vuoteen 2021 mennessä. Asukaspysäköintitunnusten määrä on vuosina 2014–2019
         vähentynyt noin 600 kpl vaikka asukasluku on kasvanut kantakaupungissa."""))
 
@@ -183,10 +183,18 @@ class ModalSharePage(Page):
             y_max=100
         )
         df['ResidentialShareOfCarsImpacted'] *= 100
+        cd.set_values(
+            residential_share_target=df['ResidentialShareOfCarsImpacted'].iloc[-1],
+            residential_share=df[~df.Forecast]['ResidentialShareOfCarsImpacted'].iloc[-1],
+        )
         fig.add_series(df=df, column_name='ResidentialShareOfCarsImpacted', trace_name='Osuus')
         icard.set_figure(fig)
         icard.set_description(cd.render("""
-        {municipality_locative} asukaspysäköinnin alueella asuu nyt n. viidesosa auton omistajista.
+        Tarkastelussa on mukana vain keskustan asukaspysäköintivyöhykkeet.
+        Asukaspysäköintilupia on myönnetty nyt n. {residential_share} % {municipality_genitive}
+        liikennekäytössä olevalle henkilöautokannalle.
+        Skenaariossa vuonna {target_year} asukaspysäköinnin piirissä on {residential_share_target} %
+        auton omistajista.
         """))
 
     def _refresh_trip_cards(self):
@@ -302,6 +310,7 @@ class ModalSharePage(Page):
         df1 = predict_cars_emissions()
 
         df1['Emissions'] -= df0['Emissions']
+        self.yearly_emissions_impact = df1['Emissions'].iloc[-1]
         df_forecast = df1[df1.Forecast]
 
         fig.add_series(df=df_forecast, column_name='Emissions', trace_name=_('Emissions'))
