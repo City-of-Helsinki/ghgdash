@@ -28,7 +28,6 @@ ENGINE_TYPE_MAP = {
 def prepare_newly_registered_cars(variables, datasets):
     df = datasets['newly_registered_cars'].copy()
     df.Vuosi = df.Vuosi.astype(int)
-    print(df.Käyttövoima.unique())
     df.Käyttövoima = df.Käyttövoima.map(lambda x: ENGINE_TYPE_MAP.get(x, 'other'))
     assert len(df.Käyttövoima.unique()) > 3
     df = df.rename(columns=dict(Käyttövoima='EngineType', Vuosi='Year'))
@@ -194,6 +193,7 @@ def predict_newly_registered_cars(variables):
 
     bev = df.pop('BEV')
     phev = df.pop('PHEV')
+    df.pop('EV Total')
     rest = 1 - (bev + phev)
 
     df = df.div(rest, axis=0)
@@ -301,7 +301,6 @@ def predict_ev_charging_station_demand(variables):
 if __name__ == '__main__':
     # pd.set_option('display.max_rows', None)
     # df = predict_cars_in_use(skip_cache=True)
-    df = predict_ev_charging_station_demand(skip_cache=True)
-    print(df)
+    df = predict_newly_registered_cars(skip_cache=True)
     #print(df.sum(axis=1, level='EngineType'))
     exit()
