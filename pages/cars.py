@@ -33,6 +33,7 @@ class CarEmissionPage(Page):
     def draw_bev_chart(self, df):
         engines = ['electric', 'PHEV (gasoline)', 'gasoline', 'diesel']
         df = df.dropna()[[*engines, 'Forecast']].copy()
+        df.loc[df.index == df.index.min(), 'Forecast'] = False
         fig = PredictionFigure(
             sector_name='Transportation',
             unit_name='%',

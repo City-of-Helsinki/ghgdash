@@ -30,7 +30,7 @@ def prepare_newly_registered_cars(variables, datasets):
     df.Vuosi = df.Vuosi.astype(int)
     print(df.Käyttövoima.unique())
     df.Käyttövoima = df.Käyttövoima.map(lambda x: ENGINE_TYPE_MAP.get(x, 'other'))
-    assert len(df.Käyttövoima.unique()) > 4
+    assert len(df.Käyttövoima.unique()) > 3
     df = df.rename(columns=dict(Käyttövoima='EngineType', Vuosi='Year'))
     df = df[df.Alue == variables['municipality_name']].groupby(['EngineType', 'Year'])['value'].sum()
     df = df.unstack('EngineType').fillna(0)
