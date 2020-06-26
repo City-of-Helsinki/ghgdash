@@ -1,8 +1,7 @@
 import flask
-import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from common.locale import get_active_locale
+from common.locale import get_active_locale, lazy_gettext as _
 from components.cards import GraphCard
 from components.stickybar import StickyBar
 
@@ -119,16 +118,16 @@ class Page:
         els = [
             dbc.DropdownMenu(
                 [
-                    dbc.DropdownMenuItem("Väestö", href='/vaesto'),
-                    dbc.DropdownMenuItem("Rakennukset", href='/rakennukset')
+                    dbc.DropdownMenuItem(_('Population'), href='/vaesto'),
+                    dbc.DropdownMenuItem(_('Buildings'), href='/rakennukset')
                 ],
                 nav=True,
                 in_navbar=True,
-                label="Oletukset",
+                label=_("Defaults"),
                 # id="dropdown-nav"
             ),
             dbc.NavItem(dbc.NavLink(href='/omat-asetukset', children=[
-                "Omat asetukset",
+                _("Own settings"),
                 badge_el,
             ])),
             dbc.NavItem(html.Span(html.I(className='language-icon')), className='nav-link pr-0'),
@@ -144,7 +143,7 @@ class Page:
             ),
         ]
         return dbc.NavbarSimple(
-            brand="Päästöskenaario %s" % self.get_variable('target_year'),
+            brand=get_variable('site_name_%s' % get_active_locale()),
             brand_href="/",
             color="primary",
             dark=True,

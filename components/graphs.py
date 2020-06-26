@@ -4,6 +4,7 @@ import pandas as pd
 from colour import Color
 import dash_html_components as html
 import dash_core_components as dcc
+from flask_babel import lazy_gettext as _
 
 from utils import deepupdate
 from utils.data import find_consecutive_start
@@ -215,7 +216,7 @@ class PredictionFigure:
                 type='scatter',
                 x=forecast_series.index.astype(str),
                 y=forecast_series,
-                name='%s (enn.)' % series.trace_name,
+                name='%s (%s)' % (series.trace_name, _('enn.')),
                 hovertemplate=hovertemplate,
                 line=dict(
                     color=color,

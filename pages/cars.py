@@ -25,7 +25,8 @@ class CarEmissionPage(Page):
     id = 'cars'
     path = '/autot'
     emission_sector = ('Transportation', 'Cars')
-    name = 'Henkilöautoilun päästöt'
+    name = _('Emissions from cars')
+    is_main_page = True
 
     def get_summary_vars(self):
         return dict(label=self.name, value=self.last_emissions, unit='kt/a')
@@ -70,7 +71,7 @@ class CarEmissionPage(Page):
         self.add_graph_card(
             id='total-mileage',
             title='%s ajetut henkilöautokilometrit' % get_variable('municipality_locative'),
-            title_i18n=dict(en='%s ajetut henkilöautokilometrit' % get_variable('municipality_name')),
+            title_i18n=dict(en='Car mileage driven in %s' % get_variable('municipality_name')),
         )
         self.add_graph_card(
             id='emission-factor',

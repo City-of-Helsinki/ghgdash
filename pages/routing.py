@@ -49,9 +49,18 @@ def get_page_for_emission_sector(*sector):
     # Remove None sectors
     sector = tuple([x for x in sector if x])
 
+    matches = []
     for page in all_pages.values():
         if not page.emission_sector:
             continue
         if sector == tuple(page.emission_sector):
-            return page_instance(page)
+            matches.append(page)
+
+    for page in matches:
+        if getattr(page, 'is_main_page', False):
+            return page
+
+    if matches:
+        return matches[0]
+
     return None

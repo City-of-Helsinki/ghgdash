@@ -23,6 +23,8 @@ SCHEMA = {
 # Variables
 VARIABLE_DEFAULTS = {
     'target_year': 2035,
+    'site_name_fi': 'Hiilineutraali Helsinki 2035',
+    'site_name_en': 'Carbon-Neutral Helsinki 2035',
     'population_forecast_correction': 0,  # Percent in target year
     'ghg_reductions_reference_year': 1990,
     'ghg_reductions_percentage_in_target_year': 80,

@@ -2,6 +2,7 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 
+from common.locale import lazy_gettext as _, get_active_locale
 from components.cards import GraphCard
 from components.graphs import PredictionFigure
 from components.stickybar import StickyBar
@@ -13,17 +14,19 @@ from .base import Page
 
 
 def make_sector_fig(df, name, metadata):
+    language = get_active_locale()
+    title = metadata.get('name_%s' % language, metadata['name'])
     fig = PredictionFigure(
         sector_name=name,
         unit_name='kt',
-        title=metadata['name'],
+        title=title,
         smoothing=True,
         # allow_nonconsecutive_years=True,
         fill=True,
         stacked=True,
     )
     if len(df.columns) == 2:
-        fig.add_series(df=df, trace_name='Päästöt', column_name='')
+        fig.add_series(df=df, trace_name=_('Emissions'), column_name='')
     else:
         fig.legend = True
         fig.legend_x = 0.8
@@ -32,21 +35,23 @@ def make_sector_fig(df, name, metadata):
         colors = generate_color_scale(metadata['color'], len(column_names))
         for idx, col_name in enumerate(column_names):
             subsector = metadata['subsectors'][col_name]
+            title = subsector.get('name_%s' % language, subsector['name'])
             fig.add_series(
-                df=df, trace_name=subsector['name'], column_name=col_name,
+                df=df, trace_name=title, column_name=col_name,
                 historical_color=colors[idx]
             )
     return fig.get_figure()
 
 
 def render_page():
+    language = get_active_locale()
     cols = []
     edf = predict_emissions().dropna(axis=1, how='all')
     forecast = edf.pop('Forecast')
     graph = PredictionFigure(
         sector_name=None,
         unit_name='kt',
-        title='Päästöt yhteensä',
+        title=_('Total emissions'),
         smoothing=True,
         fill=True,
         stacked=True,
@@ -68,8 +73,9 @@ def render_page():
         s.name = 'Emissions'
         df = pd.DataFrame(s)
         df['Forecast'] = forecast
+        name = sector_metadata.get('name_%s' % language, sector_metadata['name'])
         graph.add_series(
-            df=df, trace_name=sector_metadata['name'], column_name='Emissions',
+            df=df, trace_name=name, column_name='Emissions',
             historical_color=sector_metadata['color']
         )
 
@@ -85,7 +91,7 @@ def render_page():
 
     target_year_emissions = edf.loc[target_year].sum()
     sticky = StickyBar(
-        label='Päästövähennykset yhteensä',
+        label=_('Total emission reductions'),
         goal=last_hist - target_emissions,
         value=last_hist - end_emissions,
         unit='kt',
@@ -103,7 +109,7 @@ def render_page():
 
 page = Page(
     id='emissions',
-    name='Helsingin kasvihuonekaasupäästöt',
+    name=_('Total GHG emissions'),
     content=render_page,
     path='/',
 )

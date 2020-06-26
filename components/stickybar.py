@@ -9,6 +9,7 @@ import pandas as pd
 from variables import get_variable
 from calc.emissions import predict_emissions, predict_emission_reductions, get_sector_by_path
 from utils.colors import generate_color_scale
+from common.locale import lazy_gettext as _
 
 
 @dataclass
@@ -242,7 +243,7 @@ class StickyBar:
                 classes.append('page-summary__total--bad')
 
             target_el = html.Div([
-                "tavoite %.0f" % goal,
+                _("goal") + ' %.0f' % goal,
                 html.Span(" %s" % unit, className="unit")
             ], className="page-summary__target")
         else:
@@ -265,13 +266,13 @@ class StickyBar:
     def render(self):
         self._calc_emissions()
         pötkylä = dbc.Col([
-            html.H6('Skenaarion mukaiset päästövähennykset %s–%s' % (self.last_historical_year, self.target_year)),
+            html.H6(_('Emission reductions according to scenario') + ' %s–%s' % (self.last_historical_year, self.target_year)),
             self._render_emissions_bar()
         ], md=6)
 
         emissions_summary = self._render_value_summary(
-            self.scenario_emissions, self.target_emissions, 'Kaikki päästöt yhteensä',
-            'kt/vuosi', True
+            self.scenario_emissions, self.target_emissions, _('Total net emissions'),
+            _('kt/year'), True
         )
         emissions_summary = dbc.Col(emissions_summary, md=3)
 

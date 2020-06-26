@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 
 from components.cards import GraphCard
+from common.locale import lazy_gettext as _, get_active_locale
 from components.graphs import PredictionFigure
 from calc.emissions import predict_emissions, SECTORS
 from utils.colors import generate_color_scale
@@ -12,17 +13,18 @@ from .base import Page
 
 class MainSectorPage(Page):
     def make_sector_fig(self, df, name, metadata, base_color):
+        lang = get_active_locale()
         fig = PredictionFigure(
             sector_name=name,
             unit_name='kt',
-            title=metadata['name'],
+            title=metadata.get('name_%s' % lang, metadata['name']),
             smoothing=True,
             # allow_nonconsecutive_years=True,
             fill=True,
             stacked=True,
         )
         if len(df.columns) == 2:
-            fig.add_series(df=df, trace_name='Päästöt', column_name='', historical_color=base_color)
+            fig.add_series(df=df, trace_name=_('Emissions'), column_name='', historical_color=base_color)
         else:
             fig.legend = True
             fig.legend_x = 0.8
@@ -32,12 +34,13 @@ class MainSectorPage(Page):
             for idx, col_name in enumerate(column_names):
                 subsector = metadata['subsectors'][col_name]
                 fig.add_series(
-                    df=df, trace_name=subsector['name'], column_name=col_name,
+                    df=df, trace_name=subsector.get('name_%s' % lang, metadata['name']), column_name=col_name,
                     historical_color=colors[idx]
                 )
         return fig.get_figure()
 
     def get_content(self):
+        lang = get_active_locale()
         main_sector_name = self.emission_sector[0]
         main_sector_metadata = SECTORS[main_sector_name]
 
@@ -53,7 +56,7 @@ class MainSectorPage(Page):
         graph = PredictionFigure(
             sector_name=main_sector_name,
             unit_name='kt',
-            title='Päästöt yhteensä',
+            title=_('Total emissions'),
             smoothing=True,
             fill=True,
             stacked=True,
@@ -81,7 +84,7 @@ class MainSectorPage(Page):
             df = pd.DataFrame(s)
             df['Forecast'] = forecast
             graph.add_series(
-                df=df, trace_name=sector_metadata['name'], column_name='Emissions',
+                df=df, trace_name=sector_metadata.get('name_%s' % lang, sector_metadata['name']), column_name='Emissions',
                 historical_color=colors[idx]
             )
 
