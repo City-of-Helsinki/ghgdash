@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "open-city-design": "^1.0.0-alpha.3",
     "simple-line-icons": "^2.4.1"
   },
