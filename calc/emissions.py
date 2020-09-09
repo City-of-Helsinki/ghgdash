@@ -1,19 +1,20 @@
 import pandas as pd
 
+from utils.colors import GHG_MAIN_SECTOR_COLORS
+from utils.data import get_contributions_from_multipliers
+
+from . import calcfunc
 from .district_heating import predict_district_heating_emissions
 from .electricity import predict_electricity_consumption_emissions
 from .geothermal import predict_geothermal_production
 from .transportation.cars import predict_cars_emissions
-from . import calcfunc
-from utils.colors import GHG_MAIN_SECTOR_COLORS
-from utils.data import get_contributions_from_multipliers
-
 
 SECTORS = {
     'BuildingHeating': dict(
         name='Rakennusten lämmitys',
         name_en='Building heating',
         improvement_name='Rakennusten lämmityksen aiheuttamien päästöjen väheneminen',
+        improvement_name_en='Emission reductions from heating of buildings',
         subsectors={
             'DistrictHeat': dict(
                 name='Kaukolämpö',
@@ -23,28 +24,33 @@ SECTORS = {
                         name='Kaukolämmön tuotanto',
                         name_en='District heat production',
                         improvement_name='Kaukolämmön tuotannon puhdistuminen',
+                        improvement_name_en='Lower emissions from district heat production'
                     ),
                     'DistrictHeatDemand': dict(
                         name='Kaukolämmön kulutus',
                         name_en='District heat consumption',
                         improvement_name='Rakennusten energiatehokkuuden parantuminen',
+                        improvement_name_en='Improvement in building heat use efficiency'
                     ),
                     'DistrictHeatToGeothermalProduction': dict(
                         name='Kaukolämmön korvaaminen maalämmöllä',
                         name_en='Replacing district heat with geothermal',
                     ),
                 },
-                improvement_name='Kaukolämmön kulutuksen väheneminen ja tuotannon puhdistuminen'
+                improvement_name='Kaukolämmön kulutuksen väheneminen ja tuotannon puhdistuminen',
+                improvement_name_en='Reduction of district heat consumption and cleaner production',
             ),
             'OilHeating': dict(
                 name='Öljylämmitys',
                 name_en='Oil heating',
                 improvement_name='Öljyn osuuden vähentäminen erillislämmityksessä',
+                improvement_name_en='Decreasing use of oil in building heating',
             ),
             'ElectricityHeating': dict(
                 name='Sähkölämmitys',
                 name_en='Electric heating',
-                improvement_name='Sähkölämmityksen aiheuttamien päästöjen väheneminen'
+                improvement_name='Sähkölämmityksen aiheuttamien päästöjen väheneminen',
+                improvement_name_en='Decrease in emissions from electricity-based heating',
             ),
             'GeothermalHeating': dict(
                 name='Maalämpö',
@@ -65,21 +71,25 @@ SECTORS = {
                     name='Ajoneuvoteknologia',
                     name_en='Vehicle technology',
                     improvement_name='Sähköautojen osuuden kasvu',
+                    improvement_name_en='Increase in the share of EVs',
                 ),
                 'CarMileage': dict(
                     name='Henkilöautoilusuorite',
                     name_en='Car mileage',
                     improvement_name='Henkilöautoilusuoritteen pieneneminen',
+                    improvement_name_en='Reduction in net car mileage',
                 ),
             }),
             'Trucks': dict(
                 name='Kuorma-autot',
                 improvement_name='Kuorma-autoliikenteen päästöjen väheneminen',
+                improvement_name_en='Reduction in emissions from truck traffic',
                 name_en='Trucks',
             ),
             'OtherTransportation': dict(
                 name='Muu liikenne',
                 improvement_name='Muun liikenteen päästöjen väheneminen',
+                improvement_name_en='Reduction in emissions from other traffic',
                 name_en='Other transportation',
             ),
         }
@@ -88,21 +98,25 @@ SECTORS = {
         name='Kulutussähkö',
         name_en='Electricity consumption',
         improvement_name='Kulutussähkön aiheuttamien päästöjen väheneminen',
+        improvement_name_en='Reduction in emissions from electricity consumption',
         subsectors={
             'SolarProduction': dict(
                 name='Aurinkosähkö',
                 name_en='PV production',
                 improvement_name='Paikallisesti tuotetun sähkön osuuden lisääminen',
+                improvement_name_en='Increasing the amount of local PV energy production',
             ),
             'ElectricityDemand': dict(
                 name='Kulutussähkön kysyntä',
                 name_en='Electricity demand',
-                improvement_name='Kulutussähkön määrän vähentäminen'
+                improvement_name='Kulutussähkön määrän vähentäminen',
+                improvement_name_en='Reducing electricity consumption',
             ),
             'ElectricityProduction': dict(
                 name='Sähköntuotanto',
                 name_en='Electricity production',
-                improvement_name='Valtakunnallisen sähköntuotannon puhdistuminen'
+                improvement_name='Valtakunnallisen sähköntuotannon puhdistuminen',
+                improvement_name_en='Decrease in the national electricity production emission factor',
             )
         }
     ),

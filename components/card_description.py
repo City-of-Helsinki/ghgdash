@@ -1,5 +1,5 @@
-from babel.numbers import format_decimal
 import dash_html_components as html
+from babel.numbers import format_decimal
 
 from variables import get_variable
 
@@ -27,6 +27,7 @@ class CardDescription:
         return dict(
             org_genitive=get_variable('org_genitive'),
             org_nominative=get_variable('org_nominative'),
+            municipality=get_variable('municipality_name'),
             municipality_genitive=get_variable('municipality_genitive'),
             municipality_locative=get_variable('municipality_locative'),
             target_year=get_variable('target_year'),

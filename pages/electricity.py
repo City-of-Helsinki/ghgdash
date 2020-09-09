@@ -1,13 +1,14 @@
-import dash_html_components as html
 import dash_bootstrap_components as dbc
+import dash_html_components as html
 from dash.dependencies import Input, Output
+from flask_babel import lazy_gettext as _
 
-from variables import set_variable, get_variable
 from calc.electricity import predict_electricity_consumption_emissions
-from components.cards import GraphCard, ConnectedCardGrid
-from components.graphs import PredictionFigure
 from components.card_description import CardDescription
+from components.cards import ConnectedCardGrid, GraphCard
+from components.graphs import PredictionFigure
 from components.stickybar import StickyBar
+from variables import get_variable, set_variable
 
 from .base import Page
 
@@ -53,7 +54,7 @@ def render_page():
 
 
 page = Page(
-    id='electricity-consumption', name='Kulutussähkö', content=render_page, path='/kulutussahko',
+    id='electricity-consumption', name=_('Electricity consumption'), content=render_page, path='/electricity-consumption',
     emission_sector='ElectricityConsumption'
 )
 
@@ -77,36 +78,36 @@ def electricity_consumption_callback(value):
     df = predict_electricity_consumption_emissions()
 
     graph = PredictionFigure(
-        sector_name='ElectricityConsumption', title='Sähkönkulutus asukasta kohti',
+        sector_name='ElectricityConsumption', title=_('Electricity consumption per resident'),
         unit_name='kWh/as.'
     )
-    graph.add_series(df=df, trace_name='Sähkönkulutus/as.', column_name='ElectricityConsumptionPerCapita')
+    graph.add_series(df=df, trace_name=_('Consumption/res.'), column_name='ElectricityConsumptionPerCapita')
     per_capita_fig = graph.get_figure()
 
     graph = PredictionFigure(
-        sector_name='ElectricityConsumption', title='Kulutussähkön kulutus',
+        sector_name='ElectricityConsumption', title=_('Electricity consumption'),
         unit_name='GWh', fill=True,
     )
-    graph.add_series(df=df, trace_name='Sähkönkulutus', column_name='NetConsumption')
+    graph.add_series(df=df, trace_name=_('Electricity consumption'), column_name='NetConsumption')
     consumption_fig = graph.get_figure()
 
     graph = PredictionFigure(
-        sector_name='ElectricityConsumption', title='Sähköntuotannon päästökerroin',
+        sector_name='ElectricityConsumption', title=_('Electricity production emission factor'),
         unit_name='g/kWh',
         smoothing=True,
     )
-    graph.add_series(df=df, trace_name='Päästökerroin', column_name='EmissionFactor')
+    graph.add_series(df=df, trace_name=_('Emission factor'), column_name='EmissionFactor')
     factor_fig = graph.get_figure()
 
     graph = PredictionFigure(
-        sector_name='ElectricityConsumption', title='Kulutussähkön päästöt',
+        sector_name='ElectricityConsumption', title=_('Electricity consumption emissions'),
         unit_name='kt', smoothing=True, fill=True,
     )
     graph.add_series(df=df, trace_name='Päästöt', column_name='NetEmissions')
     emission_fig = graph.get_figure()
 
     graph = PredictionFigure(
-        sector_name='ElectricityConsumption', title='Paikallinen aurinkosähkötuotanto',
+        sector_name='ElectricityConsumption', title=_('Local PV production'),
         unit_name='GWh', smoothing=True, fill=True,
     )
     graph.add_series(df=df, trace_name='Tuotanto', column_name='SolarProduction')
@@ -137,7 +138,7 @@ def electricity_consumption_callback(value):
     """)
 
     bar = StickyBar(
-        label='Kulutussähkön päästöt',
+        label=_('Electicity consumption emissions'),
         value=last_forecast.NetEmissions,
         unit='kt',
         current_page=page

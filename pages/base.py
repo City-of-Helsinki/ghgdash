@@ -1,14 +1,14 @@
-import flask
-import dash_html_components as html
 import dash_bootstrap_components as dbc
-from common.locale import get_active_locale, lazy_gettext as _
-from components.cards import GraphCard
-from components.stickybar import StickyBar
-
-from dash.dependencies import Output, Input
+import dash_html_components as html
+import flask
+from dash.dependencies import Input, Output
 from flask import session
 
 from calc.emissions import SECTORS
+from common.locale import get_active_locale
+from common.locale import lazy_gettext as _
+from components.cards import GraphCard
+from components.stickybar import StickyBar
 from variables import get_variable, set_variable
 
 

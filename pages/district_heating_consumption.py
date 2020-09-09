@@ -1,19 +1,20 @@
-import dash_html_components as html
 import dash_bootstrap_components as dbc
+import dash_html_components as html
 import numpy as np
-from dash.dependencies import Input, Output
 from babel.numbers import format_decimal
+from dash.dependencies import Input, Output
+from flask_babel import lazy_gettext as _
 
 from calc.district_heating import predict_district_heating_emissions
 from calc.district_heating_consumption import predict_district_heat_consumption
 from calc.geothermal import predict_geothermal_production
-from variables import set_variable, get_variable
-from components.stickybar import StickyBar
-from components.graphs import PredictionFigure
-from components.cards import GraphCard, ConnectedCardGrid
 from components.card_description import CardDescription
-from .base import Page
+from components.cards import ConnectedCardGrid, GraphCard
+from components.graphs import PredictionFigure
+from components.stickybar import StickyBar
+from variables import get_variable, set_variable
 
+from .base import Page
 
 DISTRICT_HEATING_GOAL = 251
 
@@ -22,11 +23,11 @@ def draw_existing_building_unit_heat_factor_graph(df):
     graph = PredictionFigure(
         sector_name='BuildingHeating',
         unit_name='kWh/k-m²',
-        title='Vanhan rakennuskannan ominaislämmönkulutus',
+        title=_('Existing building stock heat efficiency'),
         color_scale=2,
     )
     graph.add_series(
-        df=df, column_name='ExistingBuildingHeatUsePerNetArea', trace_name='Ominaislämmönkulutus',
+        df=df, column_name='ExistingBuildingHeatUsePerNetArea', trace_name=_('Heat efficiency'),
         color_idx=1
     )
     return graph.get_figure()
@@ -36,11 +37,11 @@ def draw_new_building_unit_heat_factor_graph(df):
     graph = PredictionFigure(
         sector_name='BuildingHeating',
         unit_name='kWh/k-m²',
-        title='Uuden rakennuskannan ominaislämmönkulutus',
+        title=_('Future building stock heat efficiency'),
         color_scale=2,
     )
     graph.add_series(
-        df=df, column_name='NewBuildingHeatUsePerNetArea', trace_name='Ominaislämmönkulutus',
+        df=df, column_name='NewBuildingHeatUsePerNetArea', trace_name=_('Heat efficiency'),
         color_idx=1
     )
     return graph.get_figure()
@@ -49,7 +50,7 @@ def draw_new_building_unit_heat_factor_graph(df):
 def draw_heat_consumption(df):
     df.loc[~df.Forecast, 'NewBuildingHeatUse'] = np.nan
     graph = PredictionFigure(
-        title='Kaukolämmön kokonaiskulutus',
+        title=_('District heat net consumption'),
         unit_name='GWh',
         sector_name='BuildingHeating',
         smoothing=True,
@@ -59,11 +60,11 @@ def draw_heat_consumption(df):
     )
 
     graph.add_series(
-        df=df, column_name='ExistingBuildingHeatUse', trace_name='Vanhat rakennukset',
+        df=df, column_name='ExistingBuildingHeatUse', trace_name=_('Existing buildings'),
         color_idx=0,
     )
     graph.add_series(
-        df=df, column_name='NewBuildingHeatUse', trace_name='Uudet rakennukset',
+        df=df, column_name='NewBuildingHeatUse', trace_name=_('Future buildings'),
         color_idx=1
     )
 
@@ -73,12 +74,12 @@ def draw_heat_consumption(df):
 def draw_district_heat_consumption_emissions(df):
     graph = PredictionFigure(
         sector_name='BuildingHeating',
-        unit_name='kt', title='Kaukolämmön kulutuksen päästöt',
+        unit_name='kt', title=_('District heating emissions'),
         smoothing=True, allow_nonconsecutive_years=True,
         fill=True,
     )
     graph.add_series(
-        df=df, column_name='NetEmissions', trace_name='Päästöt'
+        df=df, column_name='NetEmissions', trace_name=_('Emissions')
     )
     return graph.get_figure()
 
@@ -89,7 +90,7 @@ def make_unit_emissions_card(df):
 
     return dbc.Card([
         html.A(dbc.CardBody([
-            html.H4('Kaukolämmön päästökerroin', className='card-title'),
+            html.H4(_('District heating emission factor'), className='card-title'),
             html.Div([
                 html.Span(
                     '%s g (CO₂e) / kWh' % (format_decimal(last_emission_factor, format='@@@', locale='fi_FI')),
@@ -107,7 +108,7 @@ def make_bottom_bar(df):
     target_emissions = DISTRICT_HEATING_GOAL
 
     bar = StickyBar(
-        label="Kaukolämmön kulutuksen päästöt",
+        label=_('District heating emissions'),
         value=last_emissions,
         # goal=target_emissions,
         unit='kt (CO₂e.)',
@@ -173,7 +174,7 @@ def generate_page():
 
 page = Page(
     id='district-heating',
-    name='Kaukolämmön kulutus',
+    name=_('District heat consumption'),
     content=generate_page,
     path='/kaukolampo',
     emission_sector=('BuildingHeating', 'DistrictHeat')
@@ -246,11 +247,11 @@ def district_heating_consumption_callback(existing_building_perc, new_building_p
     geo_fig = PredictionFigure(
         sector_name='BuildingHeating',
         unit_name='GWh',
-        title='Maalämmöllä korvattu kaukolämpö',
+        title=_('District heating replaced by geothermal'),
         fill=True,
     )
     geo_fig.add_series(
-        df=geo_df, column_name='GeoEnergyProduction', trace_name='Maalämpötuotanto',
+        df=geo_df, column_name='GeoEnergyProduction', trace_name=_('Geothermal production'),
     )
 
     fig3 = draw_heat_consumption(df)

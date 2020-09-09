@@ -1,17 +1,19 @@
-from common.locale import lazy_gettext as _, get_active_locale
+from calc.transportation.car_fleet import (predict_cars_in_use,
+                                           predict_cars_in_use_by_engine_type,
+                                           predict_ev_charging_station_demand,
+                                           predict_newly_registered_cars)
+from calc.transportation.cars import predict_cars_emissions
+from calc.transportation.parking import predict_parking_fee_impact
+from common.locale import get_active_locale
+from common.locale import lazy_gettext as _
+from components.card_description import CardDescription
 from components.cards import ConnectedCardGrid
 from components.graphs import PredictionFigure
-from components.card_description import CardDescription
-from variables import get_variable, override_variable
-from calc.transportation.parking import predict_parking_fee_impact
-from calc.transportation.cars import predict_cars_emissions
-from calc.transportation.car_fleet import (
-    predict_newly_registered_cars, predict_cars_in_use, predict_cars_in_use_by_engine_type,
-    predict_ev_charging_station_demand
-)
 from utils.colors import ENGINE_TYPE_COLORS
-from .cars import ENGINE_TYPES
+from variables import get_variable, override_variable
+
 from .base import Page
+from .cars import ENGINE_TYPES
 
 
 class CarFleetPage(Page):
@@ -129,7 +131,6 @@ class CarFleetPage(Page):
 
     def get_summary_vars(self):
         return dict(label=_('Emission reductions'), value=self.yearly_emissions_impact, unit='kt/a')
-        return dict(label=_('Net emission reductions'), value=self.net_emissions_impact, unit='kt')
 
     def refresh_graph_cards(self):
         card = self.get_card('ev-parking-fee-discount')

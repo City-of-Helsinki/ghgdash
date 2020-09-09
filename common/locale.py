@@ -1,9 +1,8 @@
-from plotly import utils as plotly_utils
-from flask_babel import Babel
-from flask_babel.speaklater import LazyString
-from flask_babel import lazy_gettext  # noqa
-from flask import request, session
 import flask
+from flask import request, session
+from flask_babel import Babel, gettext, lazy_gettext  # noqa
+from flask_babel.speaklater import LazyString
+from plotly import utils as plotly_utils
 
 
 class JSONEncoder(plotly_utils.PlotlyJSONEncoder):

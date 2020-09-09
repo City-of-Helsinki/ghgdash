@@ -1,15 +1,18 @@
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
+from flask_babel import gettext
+from flask_babel import lazy_gettext as _
 
-from variables import get_variable, set_variable
 from calc.population import predict_population
+from components.card_description import CardDescription
 from components.cards import GraphCard
 from components.graphs import make_layout
-from components.card_description import CardDescription
 from components.stickybar import StickyBar
+from variables import get_variable, set_variable
+
 from .base import Page
 
 
@@ -21,19 +24,20 @@ def generate_population_forecast_graph(pop_df):
         y=hist_df.Population / 1000,
         hovertemplate=hovertemplate,
         mode='lines',
-        name='Väkiluku',
+        name=gettext('Population'),
         line=dict(
             color='#9fc9eb',
         )
     )
 
     forecast_df = pop_df.query('Forecast')
-    forecast = go.Scatter(
+    forecast = dict(
+        type='scatter',
         x=forecast_df.index,
         y=forecast_df.Population / 1000,
         hovertemplate=hovertemplate,
         mode='lines',
-        name='Väkiluku (enn.)',
+        name=gettext('Population (pred.)'),
         line=dict(
             color='#9fc9eb',
             dash='dash'
@@ -41,11 +45,11 @@ def generate_population_forecast_graph(pop_df):
     )
     layout = make_layout(
         yaxis=dict(
-            title='1 000 asukasta',
+            title=gettext('1,000 residents'),
             zeroline=True,
         ),
         showlegend=False,
-        title="Helsingin asukasmäärä"
+        title=gettext('Population of Helsinki')
     )
 
     fig = go.Figure(data=[hist, forecast], layout=layout)
@@ -69,7 +73,7 @@ def render_page():
 
 page = Page(
     id='population',
-    name='Väestö',
+    name=_('Population'),
     content=render_page,
     path='/vaesto'
 )
@@ -102,15 +106,20 @@ def population_callback(value):
         last_year=last_hist.name
     )
     pop_desc = cd.render("""
-        {municipality_genitive} väkiluku vuonna {target_year} on {pop_in_target_year}.
-        Muutos viralliseen väestöennusteeseen on {pop_adj:noround} %.
-        Väkiluvun muutos vuoteen {last_year} verrattuna on {pop_diff} %.
+        The population of {municipality} in the year {target_year} will be {pop_in_target_year}.
+        The difference compared to the official population forecast is {pop_adj:noround} %.
+        Population change compared to {last_year} is {pop_diff} %.
     """)
+    # pop_desc = cd.render("""
+    #    {municipality_genitive} väkiluku vuonna {target_year} on {pop_in_target_year}.
+    #    Muutos viralliseen väestöennusteeseen on {pop_adj:noround} %.
+    #    Väkiluvun muutos vuoteen {last_year} verrattuna on {pop_diff} %.
+    #""")
 
     bar = StickyBar(
-        label="Väkiluku %s" % get_variable('municipality_locative'),
+        label=gettext('Population in %(municipality)s') % dict(municipality=get_variable('municipality_name')),
         value=pop_in_target_year,
-        unit='asukasta',
+        unit=gettext('residents'),
     )
 
     # return fig, pop_in_target_year.round()

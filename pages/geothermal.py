@@ -1,11 +1,13 @@
-from calc.geothermal import predict_geothermal_production
-from calc.electricity import predict_electricity_emission_factor
+from flask_babel import lazy_gettext as _
+
 from calc.district_heating import predict_district_heating_emissions
+from calc.electricity import predict_electricity_emission_factor
+from calc.geothermal import predict_geothermal_production
+from components.card_description import CardDescription
 from components.cards import ConnectedCardGrid
 from components.graphs import PredictionFigure
-
-from components.card_description import CardDescription
 from variables import get_variable
+
 from .base import Page
 
 
@@ -13,12 +15,13 @@ class GeothermalPage(Page):
     id = 'geothermal-heating'
     path = '/maalampo'
     emission_sector = ('BuildingHeating', 'GeothermalHeating')
+    name = _('Geothermal heat production')
 
     def make_cards(self):
         max_perc = 40
         self.add_graph_card(
             id='renovated-per-year',
-            title='Olemassaolevan rakennuskannan maalämmöllä lämmitettävä kerrosala',
+            title=_('Floor area heated by geothermal in existing building stock'),
             slider=dict(
                 min=0,
                 max=max_perc,
@@ -29,7 +32,7 @@ class GeothermalPage(Page):
         )
         self.add_graph_card(
             id='new-building-installation',
-            title='Uuden rakennuskannan maalämmöllä lämmitettävä kerrosala',
+            title=_('Floor area heated by geothermal in future building stock'),
             slider=dict(
                 min=0,
                 max=100,
@@ -40,20 +43,19 @@ class GeothermalPage(Page):
         )
         self.add_graph_card(
             id='geothermal-production',
-            title='Maalämpötuotanto',
-            link_to_page=('BuildingHeating', 'GeothermalHeating'),
+            title=_('Geothermal heat energy production'),
         )
         self.add_graph_card(
             id='emissions',
-            title='Maalämmön nettopäästöt',
+            title=_('Net emissions from geothermal production'),
         )
         self.add_graph_card(
             id='electricity-emission-factor',
-            title='Sähköntuotannon päästökerroin',
+            title=_('Electricity production emission factor'),
         )
         self.add_graph_card(
             id='district-heat-emission-factor',
-            title='Kaukolämmöntuotannon päästökerroin',
+            title=_('District heating emission factor'),
             link_to_page=('BuildingHeating', 'DistrictHeat'),
         )
 
@@ -105,6 +107,7 @@ class GeothermalPage(Page):
         self.set_variable('geothermal_new_building_installation_share', ncard.get_slider_value())
 
         df = predict_geothermal_production()
+        print(df)
 
         fig = PredictionFigure(
             sector_name='BuildingHeating',
@@ -194,7 +197,7 @@ class GeothermalPage(Page):
             smoothing=True,
         )
         fig.add_series(
-            df=dhdf, column_name='Emission factor', trace_name='Päästökerroin'
+            df=dhdf, column_name='Emission factor', trace_name=_('Emission factor')
         )
         card.set_figure(fig)
         last_dhdf_hist_year = dhdf[~dhdf.Forecast].index.max()
@@ -223,7 +226,7 @@ class GeothermalPage(Page):
             smoothing=True,
         )
         fig.add_series(
-            df=edf, column_name='EmissionFactor', trace_name='Päästökerroin'
+            df=edf, column_name='EmissionFactor', trace_name=_('Emission factor'),
         )
         card.set_figure(fig)
         cd.set_values(
@@ -244,6 +247,6 @@ class GeothermalPage(Page):
             fill=True,
         )
         fig.add_series(
-            df=df, column_name='NetEmissions', trace_name='Päästöt'
+            df=df, column_name='NetEmissions', trace_name=_('Emissions'),
         )
         card.set_figure(fig)

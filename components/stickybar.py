@@ -1,15 +1,18 @@
 from dataclasses import dataclass
-import dash_html_components as html
+
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
-import plotly.graph_objs as go
+import dash_html_components as html
 import numpy as np
 import pandas as pd
+import plotly.graph_objs as go
 
-from variables import get_variable
-from calc.emissions import predict_emissions, predict_emission_reductions, get_sector_by_path
-from utils.colors import generate_color_scale
+from calc.emissions import (get_sector_by_path, predict_emission_reductions,
+                            predict_emissions)
+from common.locale import get_active_locale, gettext
 from common.locale import lazy_gettext as _
+from utils.colors import generate_color_scale
+from variables import get_variable
 
 
 @dataclass
@@ -40,6 +43,7 @@ class StickyBar:
         self.scenario_reductions = last_emissions - self.scenario_emissions
 
     def _render_subsectors(self, df, sector_name, cur_x):
+        lang = get_active_locale()
         page = self.current_page
         if page is not None and page.emission_sector is not None and \
                 page.emission_sector[0] == sector_name:
@@ -98,7 +102,9 @@ class StickyBar:
                 ss_metadata = sector_metadata
 
             color = colors.pop(0)
-            name = ss_metadata.get('improvement_name') or ss_metadata['name']
+            imp_key = 'improvement_name_%s' % lang
+            name_key = 'name_%s' % lang
+            name = ss_metadata.get(imp_key) or ss_metadata.get(name_key) or ss_metadata.get('improvement_name') or ss_metadata['name']
             bar = dict(
                 type='bar',
                 x=[emissions],
@@ -117,7 +123,7 @@ class StickyBar:
         md = primary_sector_metadata
         name = md.get('improvement_name') or md['name']
         if traces:
-            name = '%s (muu)' % name
+            name = '%s (%s)' % (name, gettext('other'))
         else:
             active_emissions = emissions_left
 

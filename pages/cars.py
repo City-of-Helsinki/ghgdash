@@ -1,14 +1,12 @@
-from flask_babel import lazy_gettext as _
-
-from variables import get_variable
-from components.graphs import PredictionFigure
+from calc.transportation.cars import predict_cars_emissions
 from components.card_description import CardDescription
 from components.cards import ConnectedCardGrid
-from .base import Page
-
-from calc.transportation.cars import predict_cars_emissions
+from components.graphs import PredictionFigure
+from flask_babel import lazy_gettext as _
 from utils.colors import ENGINE_TYPE_COLORS
+from variables import get_variable
 
+from .base import Page
 
 ENGINE_TYPES = {
     'electric': dict(name=_('BEV'), color=ENGINE_TYPE_COLORS['BEV']),
@@ -23,7 +21,7 @@ ENGINE_TYPES = {
 
 class CarEmissionPage(Page):
     id = 'cars'
-    path = '/autot'
+    path = '/cars'
     emission_sector = ('Transportation', 'Cars')
     name = _('Emissions from cars')
     is_main_page = True
