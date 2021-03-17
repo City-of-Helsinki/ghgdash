@@ -1,7 +1,9 @@
+from common.locale import get_active_locale
 import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 
+from common.locale import lazy_gettext as _
 from calc.buildings import generate_building_floor_area_forecast
 from components.graphs import make_layout
 from components.cards import GraphCard
@@ -10,7 +12,8 @@ from .base import Page
 
 
 BUILDING_USES = {
-    'Asuinkerrostalot': dict(types=['Asuinkerrostalot'], color='brick'),
+    'Asuinkerrostalot': dict(
+        types=['Asuinkerrostalot'], color='brick'),
     'Muut asuinrakennukset': dict(types=['Erilliset pientalot', 'Rivi- tai ketjutalot'], color='metro'),
     'Julkiset palvelurakennukset': dict(
         types=['Liikenteen rakennukset', 'Opetusrakennukset', 'Hoitoalan rakennukset', 'Kokoontumisrakennukset'],
@@ -19,6 +22,15 @@ BUILDING_USES = {
     'Teollisuusrakennukset': dict(types=['Teollisuusrakennukset'], color='fog'),
     'Toimistorakennukset': dict(types=['Toimistorakennukset'], color='gold'),
     'Muut rakennukset': dict(types=['Varastorakennukset', 'Muu tai tuntematon käyttötarkoitus'], color='silver'),
+}
+BUILDINGS_EN = {
+    'Asuinkerrostalot': 'Residential apartment buildings',
+    'Muut asuinrakennukset': 'Other residential buildings',
+    'Julkiset palvelurakennukset': 'Public service buildings',
+    'Liikerakennukset': 'Commercial buildings',
+    'Teollisuusrakennukset': 'Industrial buildings',
+    'Toimistorakennukset': 'Office buildings',
+    'Muut rakennukset': 'Other buildings',
 }
 
 for building_name, attrs in BUILDING_USES.items():
@@ -37,13 +49,17 @@ def generate_buildings_forecast_graph():
     columns = list(last_year.sort_values(ascending=False).index.values)
 
     traces = []
+    lang = get_active_locale()
     for name in columns:
         attrs = BUILDING_USES[name]
         val = df[attrs['types']].sum(axis=1) / 1000000
+        label = name
+        if lang == 'en':
+            label = BUILDINGS_EN[name]
         trace = go.Bar(
             x=df.index,
             y=val,
-            name=name,
+            name=label,
             marker=dict(color=attrs['color']),
             hoverinfo='name',
             hovertemplate='%{x}: %{y} Mkem²'
@@ -67,13 +83,13 @@ def generate_buildings_forecast_graph():
         yaxis=dict(
             title='1 000 000 kem²',
         ),
-        xaxis=dict(title='Vuosi'),
-        title='Kerrosala käyttötarkoituksen mukaan',
+        xaxis=dict(title=_('Year')),
+        title=_('Floor area by building purpose'),
         shapes=[forecast_divider],
         showlegend=True,
         autosize=True,
     )
-    return go.Figure(data=traces, layout=layout)
+    return dict(data=traces, layout=layout)
 
 
 def render_page():
@@ -87,7 +103,7 @@ def render_page():
     return ret
 
 
-page = Page(id='rakennukset', path='/rakennukset', name='Rakennukset', content=render_page)
+page = Page(id='rakennukset', path='/rakennukset', name=_('Buildings'), content=render_page)
 
 
 if __name__ == '__main__':

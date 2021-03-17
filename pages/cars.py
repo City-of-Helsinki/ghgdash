@@ -198,9 +198,24 @@ class CarEmissionPage(Page):
             % ajokilometreistä ({phev_mileage} milj. km).
         """))
 
+        bev_card.set_description(cd.render("""
+            In this scenario, ICE cars are being replaced with electric vehicles so
+            that in the year {target_year} in the streets and highways of {municipality},
+            BEVs account for {bev_percentage} % of all car mileage
+            ({bev_mileage} Mkm) and PHEVs account for {phev_percentage} %
+            of all car mileage ({phev_mileage} M km).
+        """), lang='en')
+
         mpr_card.set_description(cd.render("""
             Vuonna {target_year} {municipality_locative} asuu {target_population} ihmistä.
             Skenaariossa ajokilometrit asukasta kohti muuttuvat vuoteen {target_year} mennessä
             {per_resident_adjustment} %. Yksi asukas ajaa keskimäärin {urban_mileage} km kaduilla
             ja {highway_mileage} km maanteillä vuodessa.
         """))
+
+        mpr_card.set_description(cd.render("""
+            In the year {target_year} City of {municipality} will have {target_population} residents.
+            In this scenario, car mileage per resident will change until {target_year} by
+            {per_resident_adjustment} %. One resident will drive on average {urban_mileage} km
+            on the streets and {highway_mileage} km on the highways per year.
+        """), lang='en')

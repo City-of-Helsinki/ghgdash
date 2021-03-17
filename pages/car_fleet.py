@@ -20,7 +20,7 @@ class CarFleetPage(Page):
     id = 'car-fleet'
     path = '/car-fleet'
     emission_sector = ('Transportation',)
-    name = 'Ajoneuvokanta'
+    name = _('Car fleet')
 
     def make_cards(self):
         from .modal_share import ModalSharePage
@@ -152,6 +152,10 @@ class CarFleetPage(Page):
             Skenaariossa täyssähköautoille myönnetään pysäköintietuuksia
             jatkossa yhteensä {parking_subsidy_for_evs} €/vuosi.
         """))
+        card.set_description(cd.render("""
+            In this scenario, BEVs will be given extra parking subsidies
+            in total {parking_subsidy_for_evs} € per year.
+        """), lang='en')
 
         card = self.get_card('share-of-ev-charging-stations-built')
         self.set_variable('share_of_ev_charging_station_demand_built', card.get_slider_value())
@@ -178,6 +182,13 @@ class CarFleetPage(Page):
             tästä määrästä rakennetaan {share_stations} %. Vuonna {target_year} olisi
             tarve {demand} latauspisteelle ja rakennettuna on {built} latauspistettä.
         """))
+        card.set_description(cd.render("""
+            Moving to BEVs will happen the fastest when public charging stations are being
+            built so that there will be {stations_per_bev:noround} stations for each 
+            100 electric vehicles. In this scenario, the city will build {share_stations} %.
+            In the year {target_year} there would be demand for {demand} stations and
+            there will be {built} stations built.
+        """), lang='en')
 
         card = self.get_card('yearly-fleet-turnover')
         df = predict_cars_in_use()

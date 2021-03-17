@@ -68,6 +68,7 @@ class GraphCard(ConnectedCardBase):
         if self.graph is None:
             self.graph = {}
         self.description = None
+        self.description_i18n = {}
         if self.title_i18n is None:
             self.title_i18n = {}
 
@@ -114,17 +115,24 @@ class GraphCard(ConnectedCardBase):
     def get_figure(self):
         return self.graph.get('figure')
 
-    def set_description(self, description):
-        self.description = description
+    def set_description(self, description, lang=None):
+        if lang is not None:
+            self.description_i18n[lang] = description
+        else:
+            self.description = description
 
     def get_description(self):
         return self.description
 
     def render_description(self):
-        if self.description is None:
+        lang = get_active_locale()
+        if lang in self.description_i18n:
+            desc = self.description_i18n[lang]
+        elif self.description is not None:
+            desc = self.description
+        else:
             return None
-
-        return dbc.Col(self.description, style=dict(minHeight='8rem'))
+        return dbc.Col(desc, style=dict(minHeight='8rem'))
 
     def set_slider_value(self, val):
         self.slider['value'] = val
