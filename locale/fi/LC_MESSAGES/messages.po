@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-17 10:21+0200\n"
+"POT-Creation-Date: 2021-03-17 15:39+0200\n"
 "PO-Revision-Date: 2020-06-02 18:12+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fi\n"
@@ -63,7 +63,7 @@ msgstr "kt/vuosi"
 msgid "Population"
 msgstr "Väestö"
 
-#: pages/base.py:122
+#: pages/base.py:122 pages/buildings.py:106
 msgid "Buildings"
 msgstr "Rakennukset"
 
@@ -74,6 +74,22 @@ msgstr "Oletukset"
 #: pages/base.py:130
 msgid "Own settings"
 msgstr "Omat asetukset"
+
+#: pages/building_heating.py:9
+msgid "Heating emissions"
+msgstr "Lämmönkulutuksen päästöt"
+
+#: pages/buildings.py:86
+msgid "Year"
+msgstr "Vuosi"
+
+#: pages/buildings.py:87
+msgid "Floor area by building purpose"
+msgstr "Kerrosala käyttötarkoituksen mukaan"
+
+#: pages/car_fleet.py:23
+msgid "Car fleet"
+msgstr "Autokanta"
 
 #: pages/car_fleet.py:133 pages/modal_share.py:147
 msgid "Emission reductions"
@@ -87,55 +103,55 @@ msgstr "€/vuosi"
 msgid "Yearly subsidy"
 msgstr "Vuosittainen alennus"
 
-#: pages/car_fleet.py:162
+#: pages/car_fleet.py:166
 msgid "charging stations"
 msgstr "latauspistettä"
 
-#: pages/car_fleet.py:165
+#: pages/car_fleet.py:169
 msgid "Built"
 msgstr "Rakennettu"
 
-#: pages/car_fleet.py:166
+#: pages/car_fleet.py:170
 msgid "Demand"
 msgstr "Tarvitaan"
 
-#: pages/car_fleet.py:190
+#: pages/car_fleet.py:201
 msgid "Turnover"
 msgstr "Uusiutuminen"
 
-#: pages/car_fleet.py:204
+#: pages/car_fleet.py:215
 msgid "cars/1,000 res."
 msgstr "autoa/1 000 as."
 
-#: pages/car_fleet.py:208
+#: pages/car_fleet.py:219
 msgid "Cars"
 msgstr "Autoa"
 
-#: pages/car_fleet.py:258
+#: pages/car_fleet.py:269
 msgid "cars"
 msgstr "autoa"
 
-#: pages/car_fleet.py:284
+#: pages/car_fleet.py:295
 msgid "Emission factor with actions"
 msgstr "Päästökerroin toimenpiteillä"
 
-#: pages/car_fleet.py:287
+#: pages/car_fleet.py:298
 msgid "Emission factor without actions"
 msgstr "Päästökerroin ilman toimenpiteitä"
 
-#: pages/car_fleet.py:296
+#: pages/car_fleet.py:307
 msgid "M km"
 msgstr "milj. km"
 
-#: pages/car_fleet.py:300 pages/cars.py:149
+#: pages/car_fleet.py:311 pages/cars.py:149
 msgid "Vehicle mileage"
 msgstr "Ajosuorite"
 
-#: pages/car_fleet.py:310
+#: pages/car_fleet.py:321
 msgid "kt/a"
 msgstr "kt/vuosi"
 
-#: pages/car_fleet.py:313
+#: pages/car_fleet.py:324
 msgid "Reductions"
 msgstr "Vähennykset"
 
