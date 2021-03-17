@@ -2,6 +2,7 @@ import pandas as pd
 
 from utils.colors import GHG_MAIN_SECTOR_COLORS
 from utils.data import get_contributions_from_multipliers
+from common.locale import lazy_gettext as _
 
 from . import calcfunc
 from .district_heating import predict_district_heating_emissions

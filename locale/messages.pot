@@ -1,14 +1,14 @@
 # Translations template for PROJECT.
-# Copyright (C) 2020 ORGANIZATION
+# Copyright (C) 2021 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-06-17 15:51+0300\n"
+"POT-Creation-Date: 2021-03-17 10:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: helbuildings.py:461
+#: helbuildings.py:461 pages/electricity.py:103
 msgid "Electricity consumption emissions"
 msgstr ""
 
@@ -34,103 +34,144 @@ msgstr ""
 msgid "Emissions in year %(year)d"
 msgstr ""
 
-#: pages/car_fleet.py:128
+#: components/graphs.py:219
+msgid "pred."
+msgstr ""
+
+#: components/stickybar.py:126
+msgid "other"
+msgstr ""
+
+#: components/stickybar.py:252
+msgid "goal"
+msgstr ""
+
+#: components/stickybar.py:275
+msgid "Emission reductions according to scenario"
+msgstr ""
+
+#: components/stickybar.py:280
+msgid "Total net emissions"
+msgstr ""
+
+#: components/stickybar.py:281
+msgid "kt/year"
+msgstr ""
+
+#: pages/base.py:121 pages/population.py:27 pages/population.py:76
+msgid "Population"
+msgstr ""
+
+#: pages/base.py:122
+msgid "Buildings"
+msgstr ""
+
+#: pages/base.py:126
+msgid "Defaults"
+msgstr ""
+
+#: pages/base.py:130
+msgid "Own settings"
+msgstr ""
+
+#: pages/car_fleet.py:133 pages/modal_share.py:147
 msgid "Emission reductions"
 msgstr ""
 
-#: pages/car_fleet.py:129
-msgid "Net emission reductions"
-msgstr ""
-
-#: pages/car_fleet.py:138 pages/modal_share.py:158
+#: pages/car_fleet.py:142 pages/modal_share.py:161
 msgid "€/year"
 msgstr ""
 
-#: pages/car_fleet.py:141
+#: pages/car_fleet.py:145
 msgid "Yearly subsidy"
 msgstr ""
 
-#: pages/car_fleet.py:150
+#: pages/car_fleet.py:162
 msgid "charging stations"
 msgstr ""
 
-#: pages/car_fleet.py:153
+#: pages/car_fleet.py:165
 msgid "Built"
 msgstr ""
 
-#: pages/car_fleet.py:154
+#: pages/car_fleet.py:166
 msgid "Demand"
 msgstr ""
 
-#: pages/car_fleet.py:165
+#: pages/car_fleet.py:190
 msgid "Turnover"
 msgstr ""
 
-#: pages/car_fleet.py:171
+#: pages/car_fleet.py:204
 msgid "cars/1,000 res."
 msgstr ""
 
-#: pages/car_fleet.py:175
+#: pages/car_fleet.py:208
 msgid "Cars"
 msgstr ""
 
-#: pages/car_fleet.py:206
+#: pages/car_fleet.py:258
 msgid "cars"
 msgstr ""
 
-#: pages/car_fleet.py:231
+#: pages/car_fleet.py:284
 msgid "Emission factor with actions"
 msgstr ""
 
-#: pages/car_fleet.py:234
+#: pages/car_fleet.py:287
 msgid "Emission factor without actions"
 msgstr ""
 
-#: pages/car_fleet.py:243
+#: pages/car_fleet.py:296
 msgid "M km"
 msgstr ""
 
-#: pages/car_fleet.py:247 pages/cars.py:149
+#: pages/car_fleet.py:300 pages/cars.py:149
 msgid "Vehicle mileage"
 msgstr ""
 
-#: pages/car_fleet.py:257
+#: pages/car_fleet.py:310
 msgid "kt/a"
 msgstr ""
 
-#: pages/car_fleet.py:260
+#: pages/car_fleet.py:313
 msgid "Reductions"
 msgstr ""
 
-#: pages/cars.py:14 pages/cars.py:15
+#: pages/cars.py:12 pages/cars.py:13
 msgid "BEV"
 msgstr ""
 
-#: pages/cars.py:16 pages/cars.py:17
+#: pages/cars.py:14 pages/cars.py:15
 msgid "PHEV"
 msgstr ""
 
-#: pages/cars.py:18
+#: pages/cars.py:16
 msgid "Gasoline"
 msgstr ""
 
-#: pages/cars.py:19
+#: pages/cars.py:17
 msgid "Diesel"
 msgstr ""
 
-#: pages/cars.py:20
+#: pages/cars.py:18
 msgid "Other"
+msgstr ""
+
+#: pages/cars.py:26
+msgid "Emissions from cars"
 msgstr ""
 
 #: pages/cars.py:128
 msgid "Vehicle mileage/res."
 msgstr ""
 
-#: pages/cars.py:138 pages/modal_share.py:312
+#: pages/cars.py:138 pages/electricity.py:99 pages/geothermal.py:200 pages/geothermal.py:229 pages/modal_share.py:324
 msgid "Emission factor"
 msgstr ""
 
-#: pages/cars.py:160 pages/modal_share.py:304
+#: pages/cars.py:160 pages/district_heating_consumption.py:82 pages/emissions.py:29 pages/geothermal.py:250
+#: pages/main_sector_base.py:27 pages/modal_share.py:316 pages/solar_power.py:168
 msgid "Emissions"
 msgstr ""
 
@@ -138,7 +179,144 @@ msgstr ""
 msgid "Clear"
 msgstr ""
 
-#: pages/modal_share.py:197
+#: pages/district_heating_consumption.py:26
+msgid "Existing building stock heat efficiency"
+msgstr ""
+
+#: pages/district_heating_consumption.py:30 pages/district_heating_consumption.py:44
+msgid "Heat efficiency"
+msgstr ""
+
+#: pages/district_heating_consumption.py:40
+msgid "Future building stock heat efficiency"
+msgstr ""
+
+#: pages/district_heating_consumption.py:53
+msgid "District heat net consumption"
+msgstr ""
+
+#: pages/district_heating_consumption.py:63 pages/solar_power.py:157
+msgid "Existing buildings"
+msgstr ""
+
+#: pages/district_heating_consumption.py:67 pages/solar_power.py:158
+msgid "Future buildings"
+msgstr ""
+
+#: pages/district_heating_consumption.py:77 pages/district_heating_consumption.py:111
+msgid "District heating emissions"
+msgstr ""
+
+#: pages/district_heating_consumption.py:93 pages/geothermal.py:58
+msgid "District heating emission factor"
+msgstr ""
+
+#: pages/district_heating_consumption.py:177
+msgid "District heat consumption"
+msgstr ""
+
+#: pages/district_heating_consumption.py:250
+msgid "District heating replaced by geothermal"
+msgstr ""
+
+#: pages/district_heating_consumption.py:254
+msgid "Geothermal production"
+msgstr ""
+
+#: pages/electricity.py:57 pages/electricity.py:88 pages/electricity.py:91
+msgid "Electricity consumption"
+msgstr ""
+
+#: pages/electricity.py:81
+msgid "Electricity consumption per resident"
+msgstr ""
+
+#: pages/electricity.py:84
+msgid "Consumption/res."
+msgstr ""
+
+#: pages/electricity.py:95 pages/geothermal.py:54
+msgid "Electricity production emission factor"
+msgstr ""
+
+#: pages/electricity.py:110
+msgid "Local PV production"
+msgstr ""
+
+#: pages/electricity.py:141
+msgid "Electicity consumption emissions"
+msgstr ""
+
+#: pages/emissions.py:54 pages/main_sector_base.py:59
+msgid "Total emissions"
+msgstr ""
+
+#: pages/emissions.py:94
+msgid "Total emission reductions"
+msgstr ""
+
+#: pages/emissions.py:112
+msgid "Total GHG emissions"
+msgstr ""
+
+#: pages/geothermal.py:18
+msgid "Geothermal heat production"
+msgstr ""
+
+#: pages/geothermal.py:24
+msgid "Floor area heated by geothermal in existing building stock"
+msgstr ""
+
+#: pages/geothermal.py:35
+msgid "Floor area heated by geothermal in future building stock"
+msgstr ""
+
+#: pages/geothermal.py:46
+msgid "Geothermal heat energy production"
+msgstr ""
+
+#: pages/geothermal.py:50
+msgid "Net emissions from geothermal production"
+msgstr ""
+
+#: pages/modal_share.py:208
 msgid "passenger kms (p.c.)"
+msgstr ""
+
+#: pages/population.py:40
+msgid "Population (pred.)"
+msgstr ""
+
+#: pages/population.py:48
+msgid "1,000 residents"
+msgstr ""
+
+#: pages/population.py:52
+msgid "Population of Helsinki"
+msgstr ""
+
+#: pages/population.py:120
+#, python-format
+msgid "Population in %(municipality)s"
+msgstr ""
+
+#: pages/population.py:122
+msgid "residents"
+msgstr ""
+
+#: pages/solar_power.py:21
+msgid "Local solar power production"
+msgstr ""
+
+#: pages/solar_power.py:82
+msgid "PV energy production"
+msgstr ""
+
+#: pages/solar_power.py:137 pages/solar_power.py:144
+msgid "Peak power"
+msgstr ""
+
+#: pages/transportation.py:9
+msgid "Transportation emissions"
 msgstr ""
 

@@ -216,7 +216,7 @@ class PredictionFigure:
                 type='scatter',
                 x=forecast_series.index.astype(str),
                 y=forecast_series,
-                name='%s (%s)' % (series.trace_name, _('enn.')),
+                name='%s (%s)' % (series.trace_name, _('pred.')),
                 hovertemplate=hovertemplate,
                 line=dict(
                     color=color,
