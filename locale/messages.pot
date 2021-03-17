@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-17 10:21+0200\n"
+"POT-Creation-Date: 2021-03-17 15:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,7 +62,7 @@ msgstr ""
 msgid "Population"
 msgstr ""
 
-#: pages/base.py:122
+#: pages/base.py:122 pages/buildings.py:106
 msgid "Buildings"
 msgstr ""
 
@@ -72,6 +72,22 @@ msgstr ""
 
 #: pages/base.py:130
 msgid "Own settings"
+msgstr ""
+
+#: pages/building_heating.py:9
+msgid "Heating emissions"
+msgstr ""
+
+#: pages/buildings.py:86
+msgid "Year"
+msgstr ""
+
+#: pages/buildings.py:87
+msgid "Floor area by building purpose"
+msgstr ""
+
+#: pages/car_fleet.py:23
+msgid "Car fleet"
 msgstr ""
 
 #: pages/car_fleet.py:133 pages/modal_share.py:147
@@ -86,55 +102,55 @@ msgstr ""
 msgid "Yearly subsidy"
 msgstr ""
 
-#: pages/car_fleet.py:162
+#: pages/car_fleet.py:166
 msgid "charging stations"
 msgstr ""
 
-#: pages/car_fleet.py:165
+#: pages/car_fleet.py:169
 msgid "Built"
 msgstr ""
 
-#: pages/car_fleet.py:166
+#: pages/car_fleet.py:170
 msgid "Demand"
 msgstr ""
 
-#: pages/car_fleet.py:190
+#: pages/car_fleet.py:201
 msgid "Turnover"
 msgstr ""
 
-#: pages/car_fleet.py:204
+#: pages/car_fleet.py:215
 msgid "cars/1,000 res."
 msgstr ""
 
-#: pages/car_fleet.py:208
+#: pages/car_fleet.py:219
 msgid "Cars"
 msgstr ""
 
-#: pages/car_fleet.py:258
+#: pages/car_fleet.py:269
 msgid "cars"
 msgstr ""
 
-#: pages/car_fleet.py:284
+#: pages/car_fleet.py:295
 msgid "Emission factor with actions"
 msgstr ""
 
-#: pages/car_fleet.py:287
+#: pages/car_fleet.py:298
 msgid "Emission factor without actions"
 msgstr ""
 
-#: pages/car_fleet.py:296
+#: pages/car_fleet.py:307
 msgid "M km"
 msgstr ""
 
-#: pages/car_fleet.py:300 pages/cars.py:149
+#: pages/car_fleet.py:311 pages/cars.py:149
 msgid "Vehicle mileage"
 msgstr ""
 
-#: pages/car_fleet.py:310
+#: pages/car_fleet.py:321
 msgid "kt/a"
 msgstr ""
 
-#: pages/car_fleet.py:313
+#: pages/car_fleet.py:324
 msgid "Reductions"
 msgstr ""
 
