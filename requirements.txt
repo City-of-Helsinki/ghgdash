@@ -4,66 +4,177 @@
 #
 #    pip-compile
 #
-appdirs==1.4.4            # via quilt
-babel==2.8.0              # via flask-babel
-brotli==1.0.7             # via flask-compress
-cachelib==0.1             # via flask-session
-certifi==2020.4.5.1       # via requests
-chardet==3.0.4            # via requests
-click==7.1.2              # via flask
-colour==0.1.5             # via -r requirements.in
-cycler==0.10.0            # via matplotlib
-cython==0.29.19           # via -r requirements.in
-dash-archer==0.1.0        # via -r requirements.in
-dash-bootstrap-components==0.10.1  # via -r requirements.in
-dash-core-components==1.10.0  # via -r requirements.in, dash
-dash-cytoscape==0.1.1     # via -r requirements.in
-dash-daq==0.5.0           # via -r requirements.in
-dash-html-components==1.0.3  # via -r requirements.in, dash, dash-cytoscape
-dash-table==4.7.0         # via -r requirements.in, dash
-dash==1.12.0              # via -r requirements.in, dash-bootstrap-components, dash-cytoscape, dash-daq
-dash_renderer==1.4.1      # via dash, dash-cytoscape
-fastparquet==0.4.0        # via -r requirements.in
-flask-babel==1.0.0        # via -r requirements.in
-flask-caching==1.8.0      # via -r requirements.in
-flask-compress==1.5.0     # via dash
-flask-session==0.3.2      # via -r requirements.in
-flask==1.1.2              # via dash, flask-babel, flask-caching, flask-compress, flask-session
-future==0.18.2            # via dash, quilt
-gunicorn==20.0.4          # via -r requirements.in
-idna==2.9                 # via requests
-itsdangerous==1.1.0       # via flask
-jinja2==2.11.2            # via flask, flask-babel
-kiwisolver==1.2.0         # via matplotlib
-llvmlite==0.32.1          # via numba
-markupsafe==1.1.1         # via jinja2
-matplotlib==3.2.1         # via -r requirements.in
-numba==0.49.1             # via -r requirements.in, fastparquet
-numpy==1.18.4             # via fastparquet, matplotlib, numba, pandas, pyarrow, quilt, scipy
-packaging==20.4           # via quilt
-pandas==1.0.4             # via -r requirements.in, fastparquet, quilt
-pint==0.12                # via -r requirements.in
-plotly==4.8.1             # via dash
-pyarrow==0.17.1           # via quilt
-pyparsing==2.4.7          # via matplotlib, packaging
-python-dateutil==2.8.1    # via matplotlib, pandas
-python-dotenv==0.13.0     # via -r requirements.in
-python-snappy==0.5.4      # via -r requirements.in
-pytz==2020.1              # via babel, flask-babel, pandas
-pyyaml==5.3.1             # via quilt
-quilt==2.9.15             # via -r requirements.in
-redis==3.5.3              # via -r requirements.in
-requests==2.23.0          # via quilt
-retrying==1.3.3           # via plotly
-ring==0.7.3               # via -r requirements.in
-scipy==1.4.1              # via -r requirements.in
-six==1.15.0               # via cycler, fastparquet, packaging, plotly, python-dateutil, quilt, retrying, ring, thrift, wirerope
-thrift==0.13.0            # via fastparquet
-tqdm==4.46.0              # via quilt
-urllib3==1.25.9           # via requests
-werkzeug==1.0.1           # via flask
-wirerope==0.3.0           # via ring
-xlrd==1.2.0               # via quilt
+appdirs==1.4.4
+    # via quilt
+babel==2.8.0
+    # via flask-babel
+brotli==1.0.7
+    # via flask-compress
+cachelib==0.1
+    # via flask-session
+certifi==2020.4.5.1
+    # via requests
+chardet==3.0.4
+    # via requests
+click==7.1.2
+    # via flask
+colour==0.1.5
+    # via -r requirements.in
+cycler==0.10.0
+    # via matplotlib
+cython==0.29.19
+    # via -r requirements.in
+dash-archer==0.1.0
+    # via -r requirements.in
+dash-bootstrap-components==0.10.1
+    # via -r requirements.in
+dash-core-components==1.10.0
+    # via
+    #   -r requirements.in
+    #   dash
+dash-cytoscape==0.1.1
+    # via -r requirements.in
+dash-daq==0.5.0
+    # via -r requirements.in
+dash-html-components==1.0.3
+    # via
+    #   -r requirements.in
+    #   dash
+    #   dash-cytoscape
+dash-table==4.7.0
+    # via
+    #   -r requirements.in
+    #   dash
+dash==1.12.0
+    # via
+    #   -r requirements.in
+    #   dash-bootstrap-components
+    #   dash-cytoscape
+    #   dash-daq
+dash_renderer==1.4.1
+    # via
+    #   dash
+    #   dash-cytoscape
+fastparquet==0.4.0
+    # via -r requirements.in
+flask-babel==1.0.0
+    # via -r requirements.in
+flask-caching==1.8.0
+    # via -r requirements.in
+flask-compress==1.5.0
+    # via dash
+flask-session==0.3.2
+    # via -r requirements.in
+flask==1.1.2
+    # via
+    #   dash
+    #   flask-babel
+    #   flask-caching
+    #   flask-compress
+    #   flask-session
+future==0.18.2
+    # via
+    #   dash
+    #   quilt
+gunicorn==20.0.4
+    # via -r requirements.in
+idna==2.9
+    # via requests
+itsdangerous==1.1.0
+    # via flask
+jinja2==2.11.2
+    # via
+    #   flask
+    #   flask-babel
+kiwisolver==1.2.0
+    # via matplotlib
+llvmlite==0.32.1
+    # via numba
+markupsafe==1.1.1
+    # via jinja2
+matplotlib==3.2.1
+    # via -r requirements.in
+numba==0.49.1
+    # via
+    #   -r requirements.in
+    #   fastparquet
+numpy==1.18.4
+    # via
+    #   fastparquet
+    #   matplotlib
+    #   numba
+    #   pandas
+    #   pyarrow
+    #   quilt
+    #   scipy
+packaging==20.4
+    # via quilt
+pandas==1.0.4
+    # via
+    #   -r requirements.in
+    #   fastparquet
+    #   quilt
+pint==0.12
+    # via -r requirements.in
+plotly==4.8.1
+    # via dash
+pyarrow==0.17.1
+    # via quilt
+pyparsing==2.4.7
+    # via
+    #   matplotlib
+    #   packaging
+python-dateutil==2.8.1
+    # via
+    #   matplotlib
+    #   pandas
+python-dotenv==0.13.0
+    # via -r requirements.in
+python-snappy==0.5.4
+    # via -r requirements.in
+pytz==2020.1
+    # via
+    #   babel
+    #   flask-babel
+    #   pandas
+pyyaml==5.4
+    # via quilt
+quilt==2.9.15
+    # via -r requirements.in
+redis==3.5.3
+    # via -r requirements.in
+requests==2.23.0
+    # via quilt
+retrying==1.3.3
+    # via plotly
+ring==0.7.3
+    # via -r requirements.in
+scipy==1.4.1
+    # via -r requirements.in
+six==1.15.0
+    # via
+    #   cycler
+    #   fastparquet
+    #   packaging
+    #   plotly
+    #   python-dateutil
+    #   quilt
+    #   retrying
+    #   ring
+    #   thrift
+    #   wirerope
+thrift==0.13.0
+    # via fastparquet
+tqdm==4.46.0
+    # via quilt
+urllib3==1.25.9
+    # via requests
+werkzeug==1.0.1
+    # via flask
+wirerope==0.3.0
+    # via ring
+xlrd==1.2.0
+    # via quilt
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
